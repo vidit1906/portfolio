@@ -41,19 +41,19 @@ const Contact = () => {
     {
       icon: Mail,
       label: 'Email',
-      value: 'vidit@example.com',
-      href: 'mailto:vidit@example.com',
+      value: 'viditnaik@gmail.com',
+      href: 'mailto:viditnaik@gmail.com',
     },
     {
       icon: Phone,
       label: 'Phone',
-      value: '+1 (555) 123-4567',
-      href: 'tel:+15551234567',
+      value: '+1 (951) 425-7229',
+      href: 'tel:+19514257229',
     },
     {
       icon: MapPin,
       label: 'Location',
-      value: 'San Francisco, CA',
+      value: 'Riverside, CA',
       href: '#',
     },
   ]
