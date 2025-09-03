@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { trackContactForm } from '@/lib/gtag'
+import emailjs from '@emailjs/browser'
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -31,14 +32,38 @@ const Contact = () => {
     trackContactForm()
     
     try {
-      // For now, just show success message and log data
-      // We'll implement email functionality separately to avoid Netlify Forms conflicts
-      console.log('Form data:', data)
-      alert('Message received! I\'ll get back to you soon. For immediate contact, please email viditnaik@gmail.com')
-      reset()
+      // EmailJS configuration
+      const serviceID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'your_service_id'
+      const templateID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || 'your_template_id'
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'your_public_key'
+
+      // Prepare template parameters
+      const templateParams = {
+        from_name: data.name,
+        from_email: data.email,
+        subject: data.subject,
+        message: data.message,
+        to_name: 'Vidit',
+        to_email: 'viditnaik@gmail.com'
+      }
+
+      // Send email via EmailJS
+      const response = await emailjs.send(
+        serviceID,
+        templateID,
+        templateParams,
+        publicKey
+      )
+
+      if (response.status === 200) {
+        alert('Message sent successfully! I\'ll get back to you soon.')
+        reset()
+      } else {
+        throw new Error('Failed to send email')
+      }
     } catch (error) {
       console.error('Form submission error:', error)
-      alert('Sorry, there was an error. Please contact me directly at viditnaik@gmail.com')
+      alert('Sorry, there was an error sending your message. Please try again or contact me directly at viditnaik@gmail.com')
     }
   }
 
