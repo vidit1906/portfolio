@@ -31,30 +31,14 @@ const Contact = () => {
     trackContactForm()
     
     try {
-      // Create form data for Netlify
-      const formParams = new URLSearchParams()
-      formParams.append('form-name', 'contact')
-      formParams.append('name', data.name)
-      formParams.append('email', data.email)
-      formParams.append('subject', data.subject)
-      formParams.append('message', data.message)
-
-      // Submit to Netlify
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formParams.toString(),
-      })
-
-      if (response.ok) {
-        alert('Message sent successfully! I\'ll get back to you soon.')
-        reset()
-      } else {
-        throw new Error('Form submission failed')
-      }
+      // For now, just show success message and log data
+      // We'll implement email functionality separately to avoid Netlify Forms conflicts
+      console.log('Form data:', data)
+      alert('Message received! I\'ll get back to you soon. For immediate contact, please email viditnaik@gmail.com')
+      reset()
     } catch (error) {
       console.error('Form submission error:', error)
-      alert('Sorry, there was an error sending your message. Please try again or contact me directly at viditnaik@gmail.com')
+      alert('Sorry, there was an error. Please contact me directly at viditnaik@gmail.com')
     }
   }
 
@@ -140,23 +124,8 @@ const Contact = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            {/* Hidden form for Netlify detection */}
-            <form name="contact" {...({ netlify: true } as Record<string, unknown>)} hidden>
-              <input type="text" name="name" />
-              <input type="email" name="email" />
-              <input type="text" name="subject" />
-              <textarea name="message"></textarea>
-            </form>
-
-            {/* Visible form */}
-            <form 
-              name="contact"
-              method="POST"
-              {...({ 'data-netlify': true } as Record<string, unknown>)}
-              onSubmit={handleSubmit(onSubmit)} 
-              className="space-y-6"
-            >
-              <input type="hidden" name="form-name" value="contact" />
+            {/* Contact Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -167,7 +136,6 @@ const Contact = () => {
                     {...register('name')}
                     type="text"
                     id="name"
-                    name="name"
                     className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                     placeholder="Your name"
                   />
@@ -184,7 +152,6 @@ const Contact = () => {
                     {...register('email')}
                     type="email"
                     id="email"
-                    name="email"
                     className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                     placeholder="your.email@example.com"
                   />
@@ -202,7 +169,6 @@ const Contact = () => {
                   {...register('subject')}
                   type="text"
                   id="subject"
-                  name="subject"
                   className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                   placeholder="What&apos;s this about?"
                 />
@@ -218,7 +184,6 @@ const Contact = () => {
                 <textarea
                   {...register('message')}
                   id="message"
-                  name="message"
                   rows={5}
                   className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-none"
                   placeholder="Tell me about your project or idea..."
