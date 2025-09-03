@@ -5,6 +5,16 @@ import { motion } from 'framer-motion'
 const Experience = () => {
   const experiences = [
     {
+      title: 'Software Engineer - AI/ML',
+      company: 'Shifa Precision Inc.',
+      period: 'July 2025 - Present',
+      description: [
+        'Leading the backend development of Project Oasis - a platform leveraging AWS and Neo4j to generate real time patient "digital twins".',
+        'Engineering a scalable data pipeline to unify biomedical data (ClinVar, PubMed, openFDA) into a knowledge graph with over 1M+ nodes and 10M+ relationships.',
+        'Implemented backend services integrating LLM APIs for biomedical data extraction and supported deployment of a GNN-based prediction engine.',
+      ],
+    },
+    {
       title: 'Student Researcher',
       company: 'Center for Robotics and Intelligent Systems',
       period: 'October 2024 - March 2025',
