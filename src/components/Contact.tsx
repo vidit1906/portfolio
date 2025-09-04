@@ -33,9 +33,37 @@ const Contact = () => {
     
     try {
       // EmailJS configuration
-      const serviceID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'your_service_id'
-      const templateID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || 'your_template_id'
-      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'your_public_key'
+      const serviceID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID
+      const templateID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+
+      // Check if EmailJS is configured
+      if (!serviceID || !templateID || !publicKey || 
+          serviceID === 'your_service_id' || 
+          templateID === 'your_template_id' || 
+          publicKey === 'your_public_key') {
+        
+        // Fallback: Show form data and direct user to email
+        console.log('Form submission data:', data)
+        
+        // Create mailto link with form data
+        const subject = encodeURIComponent(`Portfolio Contact: ${data.subject}`)
+        const body = encodeURIComponent(
+          `Hi Vidit,\n\n` +
+          `Name: ${data.name}\n` +
+          `Email: ${data.email}\n` +
+          `Subject: ${data.subject}\n\n` +
+          `Message:\n${data.message}\n\n` +
+          `---\nSent from your portfolio contact form`
+        )
+        
+        const mailtoLink = `mailto:viditnaik@gmail.com?subject=${subject}&body=${body}`
+        window.open(mailtoLink, '_blank')
+        
+        alert('Opening your email client with the message pre-filled. Alternatively, you can copy the details and email me directly at viditnaik@gmail.com')
+        reset()
+        return
+      }
 
       // Prepare template parameters
       const templateParams = {
@@ -63,7 +91,23 @@ const Contact = () => {
       }
     } catch (error) {
       console.error('Form submission error:', error)
-      alert('Sorry, there was an error sending your message. Please try again or contact me directly at viditnaik@gmail.com')
+      
+      // Fallback: Create mailto link
+      const subject = encodeURIComponent(`Portfolio Contact: ${data.subject}`)
+      const body = encodeURIComponent(
+        `Hi Vidit,\n\n` +
+        `Name: ${data.name}\n` +
+        `Email: ${data.email}\n` +
+        `Subject: ${data.subject}\n\n` +
+        `Message:\n${data.message}\n\n` +
+        `---\nSent from your portfolio contact form`
+      )
+      
+      const mailtoLink = `mailto:viditnaik@gmail.com?subject=${subject}&body=${body}`
+      window.open(mailtoLink, '_blank')
+      
+      alert('There was an issue with the form service. I\'ve opened your email client with the message pre-filled. You can also email me directly at viditnaik@gmail.com')
+      reset()
     }
   }
 
