@@ -14,7 +14,7 @@ const About = () => {
     },
     {
       name: 'LinkedIn',
-      url: 'https://linkedin.com/in/vidit-naik',
+      url: 'https://www.linkedin.com/in/viditnaik/',
       icon: Linkedin,
     },
   ]

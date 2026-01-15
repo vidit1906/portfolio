@@ -12,7 +12,7 @@ const Footer = () => {
     },
     {
       name: 'LinkedIn',
-      url: 'https://linkedin.com/in/viditnaik/',
+      url: 'https://www.linkedin.com/in/viditnaik/',
       icon: Linkedin,
     },
     {
