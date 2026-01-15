@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { trackContactForm } from '@/lib/gtag'
-import emailjs from '@emailjs/browser'
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -32,58 +31,15 @@ const Contact = () => {
     trackContactForm()
     
     try {
-      // EmailJS configuration
-      const serviceID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID
-      const templateID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
-      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
 
-      // Check if EmailJS is configured
-      if (!serviceID || !templateID || !publicKey || 
-          serviceID === 'your_service_id' || 
-          templateID === 'your_template_id' || 
-          publicKey === 'your_public_key') {
-        
-        // Fallback: Show form data and direct user to email
-        console.log('Form submission data:', data)
-        
-        // Create mailto link with form data
-        const subject = encodeURIComponent(`Portfolio Contact: ${data.subject}`)
-        const body = encodeURIComponent(
-          `Hi Vidit,\n\n` +
-          `Name: ${data.name}\n` +
-          `Email: ${data.email}\n` +
-          `Subject: ${data.subject}\n\n` +
-          `Message:\n${data.message}\n\n` +
-          `---\nSent from your portfolio contact form`
-        )
-        
-        const mailtoLink = `mailto:viditnaik@gmail.com?subject=${subject}&body=${body}`
-        window.open(mailtoLink, '_blank')
-        
-        alert('Opening your email client with the message pre-filled. Alternatively, you can copy the details and email me directly at viditnaik@gmail.com')
-        reset()
-        return
-      }
-
-      // Prepare template parameters
-      const templateParams = {
-        from_name: data.name,
-        from_email: data.email,
-        subject: data.subject,
-        message: data.message,
-        to_name: 'Vidit',
-        to_email: 'viditnaik@gmail.com'
-      }
-
-      // Send email via EmailJS
-      const response = await emailjs.send(
-        serviceID,
-        templateID,
-        templateParams,
-        publicKey
-      )
-
-      if (response.status === 200) {
+      if (response.ok) {
         alert('Message sent successfully! I\'ll get back to you soon.')
         reset()
       } else {
@@ -106,7 +62,7 @@ const Contact = () => {
       const mailtoLink = `mailto:viditnaik@gmail.com?subject=${subject}&body=${body}`
       window.open(mailtoLink, '_blank')
       
-      alert('There was an issue with the form service. I\'ve opened your email client with the message pre-filled. You can also email me directly at viditnaik@gmail.com')
+      alert('There was an issue sending the email. I\'ve opened your email client with the message pre-filled. You can also email me directly at viditnaik@gmail.com')
       reset()
     }
   }
