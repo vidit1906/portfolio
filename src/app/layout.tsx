@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from '@/components/theme-provider';
 import ScrollToTop from '@/components/ScrollToTop';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import AIChatbot from '@/components/AIChatbot';
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -39,6 +40,7 @@ export default function RootLayout({
         >
           <ScrollToTop />
           {children}
+          <AIChatbot />
         </ThemeProvider>
       </body>
     </html>
