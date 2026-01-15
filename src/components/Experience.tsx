@@ -5,9 +5,20 @@ import { motion } from 'framer-motion'
 const Experience = () => {
   const experiences = [
     {
+      title: 'Forward Deployed Engineer',
+      company: 'Checksum AI',
+      period: 'November 2025 - Present',
+      description: [
+        'Leading end-to-end delivery of AI products into client software, managing design, launch, and enablement.',
+        'Architecting self-healing QA pipelines by integrating LLM models like Claude to automatically analyze DOM changes and patch broken selectors.',
+        'Developing internal AI tools using LLM agents to ensure uniform code quality across multiple codebases, ensuring minimal failures on cloud.',
+        'Acted as the primary technical liaison for enterprise clients, leading technical design sessions, live demos, and workshops to translate complex requirements into scalable solutions.',
+      ],
+    },
+    {
       title: 'Software Engineer - AI/ML',
       company: 'Shifa Precision Inc.',
-      period: 'July 2025 - Present',
+      period: 'July 2025 - November 2025',
       description: [
         'Leading the backend development of Project Oasis - a platform leveraging AWS and Neo4j to generate real time patient "digital twins".',
         'Engineering a scalable data pipeline to unify biomedical data (ClinVar, PubMed, openFDA) into a knowledge graph with over 1M+ nodes and 10M+ relationships.',
