@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from 'framer-motion'
-import { Github, Linkedin, Download } from 'lucide-react'
+import { Github, Linkedin, Download, MessageCircle, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import { trackDownload, trackSocialClick } from '@/lib/gtag'
 
@@ -53,6 +53,38 @@ const About = () => {
               creating innovative solutions that solve real-world problems. I love
               building scalable applications and exploring new technologies.
             </p>
+
+            {/* AI Chatbot CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-4 mb-8"
+            >
+              <div className="flex items-start gap-3">
+                <div className="bg-primary/20 rounded-lg p-2 mt-1">
+                  <Sparkles className="text-primary" size={20} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+                    Try My AI Assistant
+                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">NEW</span>
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Have questions about my experience, skills, or projects? Chat with my AI assistant powered by Gemini! Click the chat icon below.
+                  </p>
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="flex items-center gap-2 text-primary text-sm font-medium"
+                  >
+                    <MessageCircle size={16} />
+                    <span>Look for the chat icon in the bottom-right →</span>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               {/* Changed button to an anchor tag for robust downloading */}
