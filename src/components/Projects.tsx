@@ -1,123 +1,206 @@
 "use client"
 
-import { motion } from 'framer-motion'
-import { Github } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { motion, AnimatePresence, type PanInfo } from 'framer-motion'
+import { Github, ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
+import Tilt from 'react-parallax-tilt'
+import { event as trackEvent } from '@/lib/gtag'
 
 const Projects = () => {
+  const [current, setCurrent] = useState(0)
+
   const projects = [
     {
       title: 'LLM-Powered Drone Control System',
-      description: 'Developed an AI-powered system that integrates drones with Large Language Models (LLMs) for user-driven control through natural language, utilizing RAG to boost command accuracy by 68%.',
+      description: 'AI-powered system integrating drones with LLMs for natural language control. Uses RAG to boost command accuracy by 68%.',
       image: '/images/projects/llm-drone.png',
-      technologies: ['Large Language Models', 'RAG', 'Python', 'Agile/Scrum'],
+      technologies: ['LangChain', 'RAG', 'Python', 'ChromaDB'],
       github: 'https://github.com/vidit1906/llmdronecontrol',
+      tagColors: ['primary', 'accent', 'tertiary', 'primary'],
     },
     {
-      title: 'InsureSearch: RAG based AI Chatbot',
-      description: 'Deployed RAG and fine-tuned LLaMA3 to boost response accuracy. Reduced token usage by 65% with top-k BERT search and enhanced LLaMA-3 with 4-bit quantization and LoRA.',
+      title: 'InsureSearch: RAG AI Chatbot',
+      description: 'Deployed RAG and fine-tuned LLaMA-3 to boost response accuracy. Reduced token usage by 65% with top-k BERT search and 4-bit quantization.',
       image: '/images/projects/insure-search.jpeg',
-      technologies: ['RAG', 'LLaMA3', 'BERT', 'LoRA', 'Fine-Tuning', 'Together AI', 'Git'],
+      technologies: ['RAG', 'LLaMA-3', 'BERT', 'LoRA'],
       github: 'https://github.com/dhrumilankola/LLama3_Hackathon',
+      tagColors: ['accent', 'primary', 'tertiary', 'accent'],
     },
     {
-      title: 'CitySafe: Chicago Crime Insights Dashboard',
-      description: 'Built an analytics dashboard processing over 1.5M records using SQL, Spark, and PostGIS. Designed geospatial visualizations with Python and React, reducing query response time by 25%.',
+      title: 'CitySafe: Crime Insights Dashboard',
+      description: 'Analytics dashboard processing 1.5M+ records with SQL, Spark, and PostGIS. Geospatial visualizations reducing query time by 25%.',
       image: '/images/projects/city-safe.png',
-      technologies: ['SQL', 'Spark', 'PostGIS', 'ETL', 'React.js', 'Python'],
+      technologies: ['SQL', 'Spark', 'PostGIS', 'React'],
       github: 'https://github.com/sreekar9601/chicago-crime-analysis',
+      tagColors: ['primary', 'accent', 'tertiary', 'primary'],
     },
     {
       title: 'CreateFlow - CalHacks 11.0',
-      description: 'Designed a multi-agent system with LangGraph linking AI agents for content, scheduling, & analytics, cutting creation time by 50%. Fine-tuned LLaMA-3 8B on LinkedIn data to predict engagement.',
+      description: 'Multi-agent system with LangGraph linking AI agents for content, scheduling & analytics, cutting creation time by 50%.',
       image: '/images/projects/create-flow.png',
-      technologies: ['LangGraph', 'Multi-Agent Systems', 'LLaMA-3', 'LoRA', 'Fine-Tuning'],
+      technologies: ['LangGraph', 'Multi-Agent', 'LLaMA-3', 'LoRA'],
       github: 'https://github.com/dhrumilankola/Calhacks11_CreateFlow',
+      tagColors: ['accent', 'primary', 'primary', 'accent'],
     },
     {
       title: 'PRRP Graph Partitioning',
-      description: 'A reimplementation and extension of spatial regionalization methodologies, featuring a novel module for implementing the PRRP algorithm in graph data structures. Demonstrates the versatility of PRRP in both spatial and graph-based representations.',
+      description: 'Reimplementation of spatial regionalization with a novel PRRP algorithm module for graph data structures.',
       image: '/images/projects/prrp.jpeg',
-      technologies: ['Python', 'Graph Theory', 'Statistical Analysis', 'Spatial Data'],
+      technologies: ['Python', 'Graph Theory', 'Statistics', 'Spatial Data'],
       github: 'https://github.com/sreekar9601/graph-partitioning-prrp',
-    }
+      tagColors: ['tertiary', 'primary', 'accent', 'tertiary'],
+    },
   ]
+
+  const navigate = useCallback((dir: number) => {
+    setCurrent(prev => {
+      const next = (prev + dir + projects.length) % projects.length
+      trackEvent({ action: 'project_navigate', category: 'carousel', label: projects[next].title })
+      return next
+    })
+  }, [projects])
+
+  const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.x < -50) navigate(1)
+    else if (info.offset.x > 50) navigate(-1)
+  }, [navigate])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') navigate(-1)
+    if (e.key === 'ArrowRight') navigate(1)
+  }, [navigate])
+
+  const colorClasses: Record<string, string> = {
+    primary: 'bg-primary/10 text-primary border-primary/20',
+    accent: 'bg-accent/10 text-accent border-accent/20',
+    tertiary: 'bg-tertiary/10 text-tertiary border-tertiary/20',
+  }
+
+  const project = projects[current]
 
   return (
     <section id="projects" className="py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Projects
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Some of my recent work and side projects
-          </p>
+          <span className="text-xs tracking-[3px] uppercase text-primary font-semibold">Portfolio</span>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mt-2">Projects</h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project, index) => (
+        <div
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          className="bg-surface border border-border rounded-2xl p-6 md:p-8 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          role="region"
+          aria-label="Project carousel"
+          aria-roledescription="carousel"
+        >
+          <AnimatePresence mode="wait">
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              whileHover={{ y: -10 }}
-              className="bg-background rounded-lg overflow-hidden shadow-lg border border-border group"
+              key={current}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={handleDragEnd}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
             >
-              <div className="relative overflow-hidden">
-                <Image
-                  src={project.image}
-                  alt={`${project.title} screenshot`}
-                  width={400}
-                  height={250}
-                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-              </div>
+              {/* Preview card with 3D tilt */}
+              <Tilt
+                tiltMaxAngleX={10}
+                tiltMaxAngleY={10}
+                glareEnable={true}
+                glareMaxOpacity={0.1}
+                glareColor="#3B82F6"
+                glarePosition="all"
+                className="rounded-xl overflow-hidden"
+              >
+                <div className="relative aspect-[16/10] bg-background rounded-xl overflow-hidden">
+                  <Image
+                    src={project.image}
+                    alt={`${project.title} screenshot`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </Tilt>
 
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  {project.title}
-                </h3>
-                <p className="text-muted-foreground mb-4 text-sm">
-                  {project.description}
-                </p>
+              {/* Info panel */}
+              <div>
+                <span className="text-[10px] tracking-[2px] uppercase text-primary font-semibold">Featured Project</span>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground mt-2 mb-3">{project.title}</h3>
+                <p className="text-sm text-text-secondary leading-relaxed mb-4">{project.description}</p>
 
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-6">
                   {project.technologies.map((tech, i) => (
                     <span
                       key={i}
-                      className="bg-secondary text-secondary-foreground px-2 py-1 text-xs rounded-full"
+                      className={`text-xs px-2.5 py-1 rounded-md border ${colorClasses[project.tagColors[i] || 'primary']}`}
                     >
                       {tech}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex space-x-4">
-                  <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    href={project.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Github size={16} />
-                    <span className="text-sm">Code</span>
-                  </motion.a>
-                </div>
+                <motion.a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                >
+                  <Github size={16} />
+                  View on GitHub
+                </motion.a>
               </div>
             </motion.div>
-          ))}
+          </AnimatePresence>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between mt-8">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigate(-1)}
+              className="w-9 h-9 bg-background border border-border rounded-lg flex items-center justify-center text-text-muted hover:text-foreground transition-colors"
+              aria-label="Previous project"
+            >
+              <ChevronLeft size={16} />
+            </motion.button>
+
+            <div className="flex gap-2">
+              {projects.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    i === current ? 'bg-primary' : 'bg-border hover:bg-text-dim'
+                  }`}
+                  aria-label={`Go to project ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigate(1)}
+              className="w-9 h-9 bg-background border border-border rounded-lg flex items-center justify-center text-text-muted hover:text-foreground transition-colors"
+              aria-label="Next project"
+            >
+              <ChevronRight size={16} />
+            </motion.button>
+          </div>
         </div>
       </div>
     </section>

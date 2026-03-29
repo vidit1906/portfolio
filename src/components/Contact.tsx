@@ -27,210 +27,116 @@ const Contact = () => {
   })
 
   const onSubmit = async (data: ContactForm) => {
-    // Track form submission
     trackContactForm()
-    
     try {
       const response = await fetch('/api/send-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-
       if (response.ok) {
-        alert('Message sent successfully! I\'ll get back to you soon.')
+        alert("Message sent successfully! I'll get back to you soon.")
         reset()
       } else {
         throw new Error('Failed to send email')
       }
-    } catch (error) {
-      console.error('Form submission error:', error)
-      
-      // Fallback: Create mailto link
+    } catch {
       const subject = encodeURIComponent(`Portfolio Contact: ${data.subject}`)
       const body = encodeURIComponent(
-        `Hi Vidit,\n\n` +
-        `Name: ${data.name}\n` +
-        `Email: ${data.email}\n` +
-        `Subject: ${data.subject}\n\n` +
-        `Message:\n${data.message}\n\n` +
-        `---\nSent from your portfolio contact form`
+        `Hi Vidit,\n\nName: ${data.name}\nEmail: ${data.email}\nSubject: ${data.subject}\n\nMessage:\n${data.message}`
       )
-      
-      const mailtoLink = `mailto:viditnaik@gmail.com?subject=${subject}&body=${body}`
-      window.open(mailtoLink, '_blank')
-      
-      alert('There was an issue sending the email. I\'ve opened your email client with the message pre-filled. You can also email me directly at viditnaik@gmail.com')
+      window.open(`mailto:viditnaik@gmail.com?subject=${subject}&body=${body}`, '_blank')
+      alert("There was an issue sending the email. I've opened your email client with the message pre-filled.")
       reset()
     }
   }
 
   const contactInfo = [
-    {
-      icon: Mail,
-      label: 'Email',
-      value: 'viditnaik@gmail.com',
-      href: 'mailto:viditnaik@gmail.com',
-    },
-    {
-      icon: Phone,
-      label: 'Phone',
-      value: '+1 (951) 425-7229',
-      href: 'tel:+19514257229',
-    },
-    {
-      icon: MapPin,
-      label: 'Location',
-      value: 'Riverside, CA',
-      href: '#',
-    },
+    { icon: Mail, label: 'Email', value: 'viditnaik@gmail.com', href: 'mailto:viditnaik@gmail.com', color: 'bg-primary/10 text-primary' },
+    { icon: MapPin, label: 'Location', value: 'San Francisco, CA', href: '#', color: 'bg-accent/10 text-accent' },
+    { icon: Phone, label: 'Phone', value: '+1 (951) 425-7229', href: 'tel:+19514257229', color: 'bg-tertiary/10 text-tertiary' },
   ]
+
+  const inputClasses = 'w-full px-4 py-3 rounded-lg bg-background border border-border text-foreground placeholder:text-text-dim text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all'
 
   return (
     <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Get In Touch
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            I&apos;m always open to discussing new opportunities and interesting projects
-          </p>
+          <span className="text-xs tracking-[3px] uppercase text-primary font-semibold">Reach Out</span>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mt-2">Get In Touch</h2>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Info */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-4"
           >
-            <h3 className="text-2xl font-semibold text-foreground mb-6">
-              Let&apos;s Talk
-            </h3>
-            <p className="text-muted-foreground mb-8">
-              Whether you have a project in mind or just want to chat about technology,
-              I&apos;d love to hear from you.
-            </p>
-
-            <div className="space-y-4">
-              {contactInfo.map((info, index) => (
-                <motion.a
-                  key={index}
-                  href={info.href}
-                  whileHover={{ x: 10 }}
-                  className="flex items-center space-x-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors"
-                >
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <info.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{info.label}</p>
-                    <p className="text-muted-foreground">{info.value}</p>
-                  </div>
-                </motion.a>
-              ))}
-            </div>
+            {contactInfo.map((info, index) => (
+              <motion.a
+                key={index}
+                href={info.href}
+                whileHover={{ x: 6 }}
+                className="flex items-center gap-4 p-4 bg-surface border border-border rounded-xl hover:border-primary/30 transition-colors"
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${info.color}`}>
+                  <info.icon size={18} />
+                </div>
+                <div>
+                  <p className="text-xs text-text-dim">{info.label}</p>
+                  <p className="text-sm text-foreground font-medium">{info.value}</p>
+                </div>
+              </motion.a>
+            ))}
           </motion.div>
 
-          {/* Contact Form */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
-            {/* Contact Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                    Name
-                  </label>
-                  <input
-                    {...register('name')}
-                    type="text"
-                    id="name"
-                    className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                    placeholder="Your name"
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-                  )}
+                  <input {...register('name')} className={inputClasses} placeholder="Your name" />
+                  {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
                 </div>
-
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                    Email
-                  </label>
-                  <input
-                    {...register('email')}
-                    type="email"
-                    id="email"
-                    className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                    placeholder="your.email@example.com"
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                  )}
+                  <input {...register('email')} type="email" className={inputClasses} placeholder="your@email.com" />
+                  {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
                 </div>
               </div>
-
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
-                  Subject
-                </label>
-                <input
-                  {...register('subject')}
-                  type="text"
-                  id="subject"
-                  className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                  placeholder="What&apos;s this about?"
-                />
-                {errors.subject && (
-                  <p className="text-red-500 text-sm mt-1">{errors.subject.message}</p>
-                )}
+                <input {...register('subject')} className={inputClasses} placeholder="Subject" />
+                {errors.subject && <p className="text-red-400 text-xs mt-1">{errors.subject.message}</p>}
               </div>
-
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                  Message
-                </label>
-                <textarea
-                  {...register('message')}
-                  id="message"
-                  rows={5}
-                  className="w-full px-4 py-3 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-none"
-                  placeholder="Tell me about your project or idea..."
-                />
-                {errors.message && (
-                  <p className="text-red-500 text-sm mt-1">{errors.message.message}</p>
-                )}
+                <textarea {...register('message')} rows={5} className={`${inputClasses} resize-none`} placeholder="Your message..." />
+                {errors.message && <p className="text-red-400 text-xs mt-1">{errors.message.message}</p>}
               </div>
-
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-primary text-primary-foreground py-3 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
               >
                 {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Send size={20} />
-                    <span>Send Message</span>
+                    <Send size={16} />
+                    Send Message
                   </>
                 )}
               </motion.button>
@@ -242,4 +148,4 @@ const Contact = () => {
   )
 }
 
-export default Contact 
+export default Contact

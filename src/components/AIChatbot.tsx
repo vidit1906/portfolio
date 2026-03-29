@@ -110,10 +110,11 @@ const AIChatbot = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-shadow"
+            className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-[14px] shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #3B82F6, #F59E6B)' }}
             aria-label="Open AI Assistant"
           >
-            <MessageCircle size={28} />
+            <MessageCircle size={22} className="text-white" />
             <motion.div
               className="absolute -top-1 -right-1 bg-green-500 rounded-full w-4 h-4"
               animate={{ scale: [1, 1.2, 1] }}
@@ -131,12 +132,12 @@ const AIChatbot = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] h-[600px] bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[380px] h-[600px] bg-surface border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between">
+            <div className="p-4 flex items-center justify-between border-b border-border text-white" style={{ background: 'linear-gradient(135deg, #3B82F6, #F59E6B)' }}>
               <div className="flex items-center gap-3">
-                <div className="bg-primary-foreground/20 rounded-full p-2">
+                <div className="bg-white/20 rounded-full p-2">
                   <Sparkles size={20} />
                 </div>
                 <div>
@@ -146,7 +147,7 @@ const AIChatbot = () => {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="hover:bg-primary-foreground/20 rounded-full p-2 transition-colors"
+                className="hover:bg-white/20 rounded-full p-2 transition-colors"
                 aria-label="Close chat"
               >
                 <X size={20} />
@@ -166,8 +167,8 @@ const AIChatbot = () => {
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                       message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground'
+                        ? 'bg-background text-text-secondary'
+                        : 'bg-primary/10 text-[#8AB4F8]'
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -181,7 +182,7 @@ const AIChatbot = () => {
                   animate={{ opacity: 1 }}
                   className="flex justify-start"
                 >
-                  <div className="bg-secondary text-secondary-foreground rounded-2xl px-4 py-2">
+                  <div className="bg-primary/10 text-[#8AB4F8] rounded-2xl px-4 py-2">
                     <Loader2 className="animate-spin" size={16} />
                   </div>
                 </motion.div>
@@ -195,12 +196,12 @@ const AIChatbot = () => {
                   transition={{ delay: 0.5 }}
                   className="space-y-2"
                 >
-                  <p className="text-xs text-muted-foreground text-center">Try asking:</p>
+                  <p className="text-xs text-text-muted text-center">Try asking:</p>
                   {suggestedQuestions.map((question, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="w-full text-left text-xs bg-secondary/50 hover:bg-secondary text-secondary-foreground rounded-lg px-3 py-2 transition-colors"
+                      className="w-full text-left text-xs bg-background hover:bg-background/80 text-text-secondary rounded-lg px-3 py-2 transition-colors"
                     >
                       {question}
                     </button>
@@ -221,7 +222,7 @@ const AIChatbot = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask me anything..."
-                  className="flex-1 bg-secondary border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   disabled={isLoading}
                 />
                 <button
@@ -233,7 +234,7 @@ const AIChatbot = () => {
                   <Send size={20} />
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-2">
+              <p className="text-xs text-text-dim text-center mt-2">
                 Powered by Gemini AI
               </p>
             </div>

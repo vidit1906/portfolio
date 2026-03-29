@@ -1,114 +1,135 @@
 "use client"
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 const Experience = () => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  })
+  const lineHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
+
   const experiences = [
     {
       title: 'Forward Deployed Engineer',
       company: 'Checksum AI',
       period: 'November 2025 - Present',
+      color: 'primary',
       description: [
         'Leading end-to-end delivery of AI products into client software, managing design, launch, and enablement.',
         'Architecting self-healing QA pipelines by integrating LLM models like Claude to automatically analyze DOM changes and patch broken selectors.',
-        'Developing internal AI tools using LLM agents to ensure uniform code quality across multiple codebases, ensuring minimal failures on cloud.',
-        'Acted as the primary technical liaison for enterprise clients, leading technical design sessions, live demos, and workshops to translate complex requirements into scalable solutions.',
+        'Developing internal AI tools using LLM agents to ensure uniform code quality across multiple codebases.',
+        'Primary technical liaison for enterprise clients, leading design sessions, demos, and workshops.',
       ],
     },
     {
       title: 'Software Engineer - AI/ML',
       company: 'Shifa Precision Inc.',
       period: 'July 2025 - November 2025',
+      color: 'accent',
       description: [
-        'Leading the backend development of Project Oasis - a platform leveraging AWS and Neo4j to generate real time patient "digital twins".',
-        'Engineering a scalable data pipeline to unify biomedical data (ClinVar, PubMed, openFDA) into a knowledge graph with over 1M+ nodes and 10M+ relationships.',
-        'Implemented backend services integrating LLM APIs for biomedical data extraction and supported deployment of a GNN-based prediction engine.',
+        'Led backend development of Project Oasis — patient "digital twins" on AWS and Neo4j.',
+        'Built knowledge graph with 1M+ nodes and 10M+ relationships from biomedical data sources.',
+        'Implemented LLM-based biomedical entity extraction achieving 95% accuracy.',
       ],
     },
     {
       title: 'Student Researcher',
       company: 'Center for Robotics and Intelligent Systems',
       period: 'October 2024 - March 2025',
+      color: 'tertiary',
       description: [
-        'Developed an Al-powered system that integrates drones with Large Language Models (LLMs) for user-driven control through natural language. ',
-        'Utilizing Retrieval-Augmented Generation (RAG) to provide the LLM with contextual knowledge from drone manuals, increasing command accuracy by 68%. ',
-        'Collaborating in a Scrum-based Agile development process to design features with a core commitment to quality and scalability. ',
+        'Developed LLM-powered drone control system via natural language commands.',
+        'Built RAG pipeline with LangChain, increasing command accuracy by 68%.',
+        'Agile/Scrum development process with focus on quality and scalability.',
       ],
     },
     {
       title: 'Machine Learning Engineer',
       company: 'Kent Cam',
       period: 'May 2022 - June 2022',
+      color: 'primary',
       description: [
-        'Utilized data analytics techniques to assess and optimize the integration of new features in company cameras, significantly improving core functionalities and enhancing overall product performance. ',
-        'Automated cross-region data pipelines, reducing data-validation errors by 35% and ensuring 99.9% data integrity across multiple data streams. ',
-        'Conducted thorough product testing, identifying and resolving critical software issues to ensure seamless and efficient performance. ',
+        'Utilized data analytics to optimize camera feature integration.',
+        'Automated cross-region data pipelines, reducing validation errors by 35%.',
+        'Ensured 99.9% data integrity across multiple data streams.',
       ],
     },
     {
       title: 'Software Engineer',
       company: 'StuDetails',
       period: 'July 2020 - February 2021',
+      color: 'accent',
       description: [
-        'Built a scalable web application using React and Flask to manage scheduling and inspections for enterprise clients, supporting 5,000+ monthly users across 50+ distributed locations. ',
-        'Led cross-functional collaboration to optimize AWS S3 data workflows using AWS Glue, improving data accuracy by 25% and enabling real-time integration with client-facing systems. ',
-        'Implemented automated testing and CI/CD pipelines, cutting deployment failures by 30% for apps processing 1TB+ data monthly. ',
+        'Built scalable web app with React & Flask serving 5,000+ monthly users across 50+ locations.',
+        'Optimized AWS S3 workflows with AWS Glue, improving data accuracy by 25%.',
+        'Implemented CI/CD pipelines, cutting deployment failures by 30%.',
       ],
     },
   ]
 
+  const colorMap: Record<string, string> = {
+    primary: 'bg-primary',
+    accent: 'bg-accent',
+    tertiary: 'bg-tertiary',
+  }
+
+  const textColorMap: Record<string, string> = {
+    primary: 'text-primary',
+    accent: 'text-accent',
+    tertiary: 'text-tertiary',
+  }
+
   return (
-    <section id="experience" className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/10">
-      <div className="max-w-7xl mx-auto">
+    <section id="experience" className="py-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Experience
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            My professional journey and the roles that shaped my career
-          </p>
+          <span className="text-xs tracking-[3px] uppercase text-primary font-semibold">Career</span>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mt-2">Experience</h2>
         </motion.div>
 
-        <div className="relative">
-          {/* Timeline line */}
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-primary hidden md:block"></div>
+        <div ref={containerRef} className="relative">
+          {/* Timeline track */}
+          <div className="absolute left-[7px] md:left-[11px] top-0 bottom-0 w-[2px] bg-border">
+            <motion.div
+              style={{ height: lineHeight }}
+              className="w-full bg-gradient-to-b from-primary via-accent to-tertiary"
+            />
+          </div>
 
-          <div className="space-y-12">
+          <div className="space-y-10">
             {experiences.map((exp, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: -50 }}
+                initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-                className="relative"
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="relative pl-8 md:pl-10"
               >
-                {/* Timeline dot */}
-                <div className="absolute left-6 w-4 h-4 bg-primary rounded-full border-4 border-background hidden md:block"></div>
+                {/* Timeline node */}
+                <div className={`absolute left-0 md:left-[3px] top-2 w-[16px] h-[16px] rounded-full ${colorMap[exp.color]} border-[3px] border-background`} />
 
-                <div className="md:ml-20 bg-background rounded-lg p-6 shadow-lg border border-border">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                <div className="bg-surface border border-border rounded-xl p-5 hover:border-border/80 transition-colors">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
                     <div>
-                      <h3 className="text-xl font-semibold text-foreground">
-                        {exp.title}
-                      </h3>
-                      <p className="text-primary font-medium">{exp.company}</p>
+                      <h3 className="text-base font-bold text-foreground">{exp.title}</h3>
+                      <p className={`text-sm font-semibold ${textColorMap[exp.color]}`}>{exp.company}</p>
                     </div>
-                    <span className="text-sm text-muted-foreground bg-secondary px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">
-                      {exp.period}
-                    </span>
+                    <span className="text-xs text-text-dim mt-1 md:mt-0">{exp.period}</span>
                   </div>
-
-                  <ul className="space-y-2">
+                  <ul className="space-y-1.5">
                     {exp.description.map((item, i) => (
-                      <li key={i} className="text-muted-foreground flex items-start">
-                        <span className="text-primary mr-2 mt-1">•</span>
+                      <li key={i} className="text-sm text-text-secondary flex items-start">
+                        <span className={`mr-2 mt-1.5 w-1 h-1 rounded-full flex-shrink-0 ${colorMap[exp.color]}`} />
                         {item}
                       </li>
                     ))}
