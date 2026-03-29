@@ -111,7 +111,7 @@ const AIChatbot = () => {
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
             className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-[14px] shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #F59E6B)' }}
+            style={{ background: 'linear-gradient(135deg, #3B82F6, #C4A6FF)' }}
             aria-label="Open AI Assistant"
           >
             <MessageCircle size={22} className="text-white" />
@@ -135,7 +135,7 @@ const AIChatbot = () => {
             className="fixed bottom-6 right-6 z-50 w-[380px] h-[600px] bg-surface border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="p-4 flex items-center justify-between border-b border-border text-white" style={{ background: 'linear-gradient(135deg, #3B82F6, #F59E6B)' }}>
+            <div className="p-4 flex items-center justify-between border-b border-border text-white" style={{ background: 'linear-gradient(135deg, #3B82F6, #C4A6FF)' }}>
               <div className="flex items-center gap-3">
                 <div className="bg-white/20 rounded-full p-2">
                   <Sparkles size={20} />

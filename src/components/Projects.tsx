@@ -1,35 +1,35 @@
 "use client"
 
-import { useState, useCallback } from 'react'
-import { motion, AnimatePresence, type PanInfo } from 'framer-motion'
-import { Github, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useRef, useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Github, ExternalLink } from 'lucide-react'
 import Image from 'next/image'
 import Tilt from 'react-parallax-tilt'
-import { event as trackEvent } from '@/lib/gtag'
 
 const Projects = () => {
-  const [current, setCurrent] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [isPaused, setIsPaused] = useState(false)
 
   const projects = [
     {
-      title: 'LLM-Powered Drone Control System',
-      description: 'AI-powered system integrating drones with LLMs for natural language control. Uses RAG to boost command accuracy by 68%.',
+      title: 'LLM-Powered Drone Control',
+      description: 'AI system integrating drones with LLMs for natural language control. RAG boosts command accuracy by 68%.',
       image: '/images/projects/llm-drone.png',
       technologies: ['LangChain', 'RAG', 'Python', 'ChromaDB'],
       github: 'https://github.com/vidit1906/llmdronecontrol',
       tagColors: ['primary', 'accent', 'tertiary', 'primary'],
     },
     {
-      title: 'InsureSearch: RAG AI Chatbot',
-      description: 'Deployed RAG and fine-tuned LLaMA-3 to boost response accuracy. Reduced token usage by 65% with top-k BERT search and 4-bit quantization.',
+      title: 'InsureSearch: RAG Chatbot',
+      description: 'Fine-tuned LLaMA-3 with RAG. Reduced token usage by 65% via top-k BERT search and 4-bit quantization.',
       image: '/images/projects/insure-search.jpeg',
       technologies: ['RAG', 'LLaMA-3', 'BERT', 'LoRA'],
       github: 'https://github.com/dhrumilankola/LLama3_Hackathon',
       tagColors: ['accent', 'primary', 'tertiary', 'accent'],
     },
     {
-      title: 'CitySafe: Crime Insights Dashboard',
-      description: 'Analytics dashboard processing 1.5M+ records with SQL, Spark, and PostGIS. Geospatial visualizations reducing query time by 25%.',
+      title: 'CitySafe: Crime Dashboard',
+      description: 'Analytics dashboard processing 1.5M+ records with SQL, Spark, and PostGIS. Reduced query time by 25%.',
       image: '/images/projects/city-safe.png',
       technologies: ['SQL', 'Spark', 'PostGIS', 'React'],
       github: 'https://github.com/sreekar9601/chicago-crime-analysis',
@@ -37,7 +37,7 @@ const Projects = () => {
     },
     {
       title: 'CreateFlow - CalHacks 11.0',
-      description: 'Multi-agent system with LangGraph linking AI agents for content, scheduling & analytics, cutting creation time by 50%.',
+      description: 'Multi-agent system with LangGraph for content, scheduling & analytics. Cut creation time by 50%.',
       image: '/images/projects/create-flow.png',
       technologies: ['LangGraph', 'Multi-Agent', 'LLaMA-3', 'LoRA'],
       github: 'https://github.com/dhrumilankola/Calhacks11_CreateFlow',
@@ -45,31 +45,41 @@ const Projects = () => {
     },
     {
       title: 'PRRP Graph Partitioning',
-      description: 'Reimplementation of spatial regionalization with a novel PRRP algorithm module for graph data structures.',
+      description: 'Spatial regionalization with a novel PRRP algorithm module for graph data structures.',
       image: '/images/projects/prrp.jpeg',
-      technologies: ['Python', 'Graph Theory', 'Statistics', 'Spatial Data'],
+      technologies: ['Python', 'Graph Theory', 'Statistics', 'Spatial'],
       github: 'https://github.com/sreekar9601/graph-partitioning-prrp',
       tagColors: ['tertiary', 'primary', 'accent', 'tertiary'],
     },
   ]
 
-  const navigate = useCallback((dir: number) => {
-    setCurrent(prev => {
-      const next = (prev + dir + projects.length) % projects.length
-      trackEvent({ action: 'project_navigate', category: 'carousel', label: projects[next].title })
-      return next
-    })
-  }, [projects])
+  // Duplicate for seamless infinite scroll
+  const allProjects = [...projects, ...projects]
 
-  const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.x < -50) navigate(1)
-    else if (info.offset.x > 50) navigate(-1)
-  }, [navigate])
+  useEffect(() => {
+    const container = scrollRef.current
+    if (!container) return
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft') navigate(-1)
-    if (e.key === 'ArrowRight') navigate(1)
-  }, [navigate])
+    let animationId: number
+    let scrollPos = 0
+    const speed = 0.5 // px per frame
+
+    const scroll = () => {
+      if (!isPaused && container) {
+        scrollPos += speed
+        // Reset when we've scrolled through the first set
+        const halfWidth = container.scrollWidth / 2
+        if (scrollPos >= halfWidth) {
+          scrollPos = 0
+        }
+        container.scrollLeft = scrollPos
+      }
+      animationId = requestAnimationFrame(scroll)
+    }
+
+    animationId = requestAnimationFrame(scroll)
+    return () => cancelAnimationFrame(animationId)
+  }, [isPaused])
 
   const colorClasses: Record<string, string> = {
     primary: 'bg-primary/10 text-primary border-primary/20',
@@ -77,11 +87,9 @@ const Projects = () => {
     tertiary: 'bg-tertiary/10 text-tertiary border-tertiary/20',
   }
 
-  const project = projects[current]
-
   return (
-    <section id="projects" className="py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <section id="projects" className="py-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -92,116 +100,75 @@ const Projects = () => {
           <span className="text-xs tracking-[3px] uppercase text-primary font-semibold">Portfolio</span>
           <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mt-2">Projects</h2>
         </motion.div>
+      </div>
 
-        <div
-          tabIndex={0}
-          onKeyDown={handleKeyDown}
-          className="bg-surface border border-border rounded-2xl p-6 md:p-8 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-          role="region"
-          aria-label="Project carousel"
-          aria-roledescription="carousel"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragEnd={handleDragEnd}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
-            >
-              {/* Preview card with 3D tilt */}
-              <Tilt
-                tiltMaxAngleX={10}
-                tiltMaxAngleY={10}
-                glareEnable={true}
-                glareMaxOpacity={0.1}
-                glareColor="#3B82F6"
-                glarePosition="all"
-                className="rounded-xl overflow-hidden"
-              >
-                <div className="relative aspect-[16/10] bg-background rounded-xl overflow-hidden">
-                  <Image
-                    src={project.image}
-                    alt={`${project.title} screenshot`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </Tilt>
+      {/* Auto-scrolling container — full width, no padding */}
+      <div
+        ref={scrollRef}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+        className="flex gap-5 overflow-hidden px-4 sm:px-6 lg:px-8 cursor-grab"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {allProjects.map((project, index) => (
+          <Tilt
+            key={`${project.title}-${index}`}
+            tiltMaxAngleX={6}
+            tiltMaxAngleY={6}
+            glareEnable={true}
+            glareMaxOpacity={0.08}
+            glareColor="#3B82F6"
+            glarePosition="all"
+            className="flex-shrink-0 w-[320px] md:w-[360px]"
+          >
+            <div className="bg-surface border border-border rounded-xl overflow-hidden h-full group hover:border-primary/30 transition-colors">
+              {/* Image */}
+              <div className="relative h-44 overflow-hidden">
+                <Image
+                  src={project.image}
+                  alt={`${project.title} screenshot`}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface/80 to-transparent" />
+              </div>
 
-              {/* Info panel */}
-              <div>
-                <span className="text-[10px] tracking-[2px] uppercase text-primary font-semibold">Featured Project</span>
-                <h3 className="text-xl md:text-2xl font-bold text-foreground mt-2 mb-3">{project.title}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed mb-4">{project.description}</p>
+              {/* Content */}
+              <div className="p-5">
+                <h3 className="text-base font-bold text-foreground mb-2">{project.title}</h3>
+                <p className="text-xs text-text-secondary leading-relaxed mb-4 line-clamp-3">{project.description}</p>
 
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-1.5 mb-4">
                   {project.technologies.map((tech, i) => (
                     <span
                       key={i}
-                      className={`text-xs px-2.5 py-1 rounded-md border ${colorClasses[project.tagColors[i] || 'primary']}`}
+                      className={`text-[10px] px-2 py-0.5 rounded-md border ${colorClasses[project.tagColors[i] || 'primary']}`}
                     >
                       {tech}
                     </span>
                   ))}
                 </div>
 
-                <motion.a
+                <a
                   href={project.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
                 >
-                  <Github size={16} />
-                  View on GitHub
-                </motion.a>
+                  <Github size={14} />
+                  View Code
+                  <ExternalLink size={10} />
+                </a>
               </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between mt-8">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => navigate(-1)}
-              className="w-9 h-9 bg-background border border-border rounded-lg flex items-center justify-center text-text-muted hover:text-foreground transition-colors"
-              aria-label="Previous project"
-            >
-              <ChevronLeft size={16} />
-            </motion.button>
-
-            <div className="flex gap-2">
-              {projects.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrent(i)}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    i === current ? 'bg-primary' : 'bg-border hover:bg-text-dim'
-                  }`}
-                  aria-label={`Go to project ${i + 1}`}
-                />
-              ))}
             </div>
+          </Tilt>
+        ))}
+      </div>
 
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => navigate(1)}
-              className="w-9 h-9 bg-background border border-border rounded-lg flex items-center justify-center text-text-muted hover:text-foreground transition-colors"
-              aria-label="Next project"
-            >
-              <ChevronRight size={16} />
-            </motion.button>
-          </div>
-        </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <p className="text-xs text-text-dim text-center">Hover to pause</p>
       </div>
     </section>
   )

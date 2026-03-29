@@ -30,8 +30,7 @@ const Footer = () => {
             <motion.a
               key={link.name}
               href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...(link.name !== 'Email' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="w-9 h-9 bg-surface border border-border rounded-lg flex items-center justify-center text-text-muted hover:text-foreground transition-colors"
