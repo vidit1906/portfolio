@@ -1,18 +1,34 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
-import ScrollToTop from '@/components/ScrollToTop';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import AIChatbot from '@/components/AIChatbot';
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Vidit - Software Engineer Portfolio",
-  description: "Software Engineer passionate about building innovative solutions",
+  title: "Vidit Naik — Forward Deployed Engineer",
+  description: "Software engineer building AI that actually ships. Currently at Checksum AI in San Francisco.",
 };
 
 export default function RootLayout({
@@ -21,14 +37,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics GA_MEASUREMENT_ID={process.env.NEXT_PUBLIC_GA_ID} />
         )}
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <ScrollToTop />
+      <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}>
         {children}
         <AIChatbot />
       </body>
