@@ -335,8 +335,13 @@ h1.hero-title .flap[data-flap-color="amber"] { color: var(--amber); }
 }
 
 /* ============================================================ WORLD JOURNEY MAP */
-.world-map {
-  position: absolute; inset: 0;
+/* selector is intentionally specific: maplibre-gl adds .maplibregl-map to this
+   same element with position:relative, which would collapse it to 0 height. */
+.world-frame .world-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background: #07090d;
   filter: contrast(0.95) saturate(0.85) brightness(0.85);
 }

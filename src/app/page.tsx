@@ -533,6 +533,7 @@ export default function Home() {
 
         map.on('load', () => {
           mapReady = true
+          map.resize()
           markers.forEach((m) => {
             const el = document.createElement('div')
             el.className = 'map-marker' + (m.context ? ' context' : '')
