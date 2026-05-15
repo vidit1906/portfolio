@@ -1,33 +1,143 @@
 'use client'
 
 import { useEffect } from 'react'
+import 'maplibre-gl/dist/maplibre-gl.css'
+
+type Skill = {
+  name: string
+  level: string
+  logo?: string
+  fb?: string
+  noLogo?: string
+}
+
+const stackBlocks: { num: string; title: string; skills: Skill[] }[] = [
+  {
+    num: '01',
+    title: 'AI / ML',
+    skills: [
+      { name: 'Claude (Anthropic)', level: 'daily', logo: 'anthropic', fb: 'CL' },
+      { name: 'GPT · Gemini · Qwen', level: 'multi-model', noLogo: 'AI' },
+      { name: 'LangChain · LangGraph', level: 'agents', logo: 'langchain', fb: 'LC' },
+      { name: 'Retrieval-Augmented Generation', level: 'depth', noLogo: 'RAG' },
+      { name: 'PyTorch · LoRA fine-tuning', level: 'applied', logo: 'pytorch', fb: 'PT' },
+      { name: 'Ollama · local inference', level: 'tinkering', logo: 'ollama', fb: 'OL' },
+    ],
+  },
+  {
+    num: '02',
+    title: 'Backend',
+    skills: [
+      { name: 'Python', level: 'primary', logo: 'python', fb: 'PY' },
+      { name: 'Node.js · Express', level: 'daily', logo: 'nodedotjs', fb: 'NO' },
+      { name: 'Java · SpringBoot', level: 'working', logo: 'spring', fb: 'SP' },
+      { name: 'Flask · Django · FastAPI', level: 'comfortable', logo: 'flask', fb: 'FL' },
+      { name: 'Neo4j · knowledge graphs', level: 'deep', logo: 'neo4j' },
+      { name: 'MongoDB · MySQL · SQL', level: 'daily', logo: 'mongodb', fb: 'MO' },
+    ],
+  },
+  {
+    num: '03',
+    title: 'Cloud / DevOps',
+    skills: [
+      { name: 'AWS · S3 / Glue / Lambda / EC2', level: 'prod', noLogo: 'AWS' },
+      { name: 'Google Cloud Platform', level: 'prod', logo: 'googlecloud', fb: 'GO' },
+      { name: 'Docker', level: 'daily', logo: 'docker', fb: 'DO' },
+      { name: 'Kubernetes', level: 'working', logo: 'kubernetes', fb: 'KU' },
+      { name: 'Jenkins · GH Actions', level: 'CI/CD', logo: 'jenkins', fb: 'JE' },
+      { name: 'Git · GitHub', level: 'always', logo: 'git', fb: 'GI' },
+    ],
+  },
+  {
+    num: '04',
+    title: 'QA / Frontend',
+    skills: [
+      { name: 'Playwright', level: 'self-healing', noLogo: 'PW' },
+      { name: 'PyTest · JUnit · Selenium', level: 'full-stack QA', logo: 'pytest', fb: 'PY' },
+      { name: 'React', level: 'prototyping', logo: 'react', fb: 'RE' },
+      { name: 'TypeScript · JavaScript', level: 'daily', logo: 'typescript', fb: 'TY' },
+      { name: 'Jira · Agile / Scrum', level: 'delivery', logo: 'jira', fb: 'JR' },
+      { name: 'Linux · shell', level: 'native', logo: 'linux', fb: 'LI' },
+    ],
+  },
+]
+
+const disciplines: (string | [string, string])[] = [
+  'Software engineer',
+  ['LLM ', 'whisperer'],
+  'RAG & retrieval',
+  'Forward deployed',
+  'Knowledge graphs',
+  'Agents & orchestration',
+  ['Self-healing ', 'QA'],
+  'Cloud & infra',
+  ['Aviation ', 'enthusiast'],
+]
+
+function MarqueeSet({ label }: { label: string }) {
+  return (
+    <>
+      <span className="label">{label}</span>
+      {disciplines.map((d, i) => (
+        <span key={i} style={{ display: 'contents' }}>
+          <span className="item">
+            {Array.isArray(d) ? (
+              <>
+                {d[0]}
+                <span className="alt">{d[1]}</span>
+              </>
+            ) : (
+              d
+            )}
+          </span>
+          <span className="dot"></span>
+        </span>
+      ))}
+    </>
+  )
+}
 
 export default function Home() {
   useEffect(() => {
+    const cleanups: (() => void)[] = []
+
     // ====== UTC clock
     const clockEl = document.getElementById('utc-clock')
-    let clockTimer: ReturnType<typeof setInterval> | undefined
     if (clockEl) {
       const tick = () => {
         const d = new Date()
         const hh = String(d.getUTCHours()).padStart(2, '0')
         const mm = String(d.getUTCMinutes()).padStart(2, '0')
-        const ss = String(d.getUTCSeconds()).padStart(2, '0')
-        clockEl.textContent = `${hh}:${mm}:${ss} UTC`
+        clockEl.textContent = `${hh}:${mm} UTC`
       }
       tick()
-      clockTimer = setInterval(tick, 1000)
+      const t = setInterval(tick, 1000)
+      cleanups.push(() => clearInterval(t))
+    }
+
+    // ====== Local clock (Now panel)
+    const localClockEl = document.getElementById('now-local-clock')
+    if (localClockEl) {
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'America/Los_Angeles',
+      })
+      const tick = () => {
+        localClockEl.textContent = fmt.format(new Date())
+      }
+      tick()
+      const t = setInterval(tick, 30000)
+      cleanups.push(() => clearInterval(t))
     }
 
     // ====== Scroll spy
-    const ids = ['about', 'log', 'work', 'stack', 'contact']
+    const ids = ['about', 'journey', 'work', 'stack', 'contact']
     const links = document.querySelectorAll<HTMLAnchorElement>('.nav a')
-    const map = new Map<string, HTMLAnchorElement>()
-    links.forEach((a) => {
-      const href = a.getAttribute('href') || ''
-      map.set(href.slice(1), a)
-    })
-    const onScroll = () => {
+    const linkMap = new Map<string, HTMLAnchorElement>()
+    links.forEach((a) => linkMap.set((a.getAttribute('href') || '').slice(1), a))
+    const onScrollSpy = () => {
       const y = window.scrollY + 140
       let active = ids[0]
       for (const id of ids) {
@@ -35,11 +145,12 @@ export default function Home() {
         if (el && el.offsetTop <= y) active = id
       }
       links.forEach((a) => a.classList.remove('active'))
-      const a = map.get(active)
+      const a = linkMap.get(active)
       if (a) a.classList.add('active')
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
+    window.addEventListener('scroll', onScrollSpy, { passive: true })
+    onScrollSpy()
+    cleanups.push(() => window.removeEventListener('scroll', onScrollSpy))
 
     // ====== Smooth scroll for nav
     const anchorClick = (e: Event) => {
@@ -56,14 +167,13 @@ export default function Home() {
     }
     const anchors = document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')
     anchors.forEach((a) => a.addEventListener('click', anchorClick))
+    cleanups.push(() => anchors.forEach((a) => a.removeEventListener('click', anchorClick)))
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     // ====== Plane cursor
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
     const cur = document.getElementById('planeCursor')
-    let rafId = 0
-    let hotTimer: ReturnType<typeof setInterval> | undefined
-    let onMove: ((e: MouseEvent) => void) | undefined
-    let onDown: (() => void) | undefined
     if (isFinePointer && cur) {
       let mx = window.innerWidth / 2,
         my = window.innerHeight / 2
@@ -75,11 +185,11 @@ export default function Home() {
       let targetRot = 0
       let lastTrail = 0
 
-      onMove = (e: MouseEvent) => {
+      const onMove = (e: MouseEvent) => {
         mx = e.clientX
         my = e.clientY
       }
-      onDown = () => {
+      const onDown = () => {
         cur.style.setProperty('--r', rot + 'deg')
         cur.classList.remove('click')
         void cur.offsetWidth
@@ -95,29 +205,25 @@ export default function Home() {
           return
         }
         const isHot = !!el.closest(
-          'a, button, .btn, [role="button"], .work, .log-row, .edu-card, .cap-block, .iconlinks a, .nav a'
+          'a, button, .btn, [role="button"], .work, .edu-card, .stack-block, .iconlinks a, .nav a'
         )
         cur.classList.toggle('hot', isHot)
       }
-      hotTimer = setInterval(hotCheck, 80)
+      const hotTimer = setInterval(hotCheck, 80)
 
+      let rafId = 0
       const frame = (t: number) => {
         px += (mx - px) * 0.28
         py += (my - py) * 0.28
-
         const dx = mx - lastX
         const dy = my - lastY
         const dist = Math.hypot(dx, dy)
-        if (dist > 1.5) {
-          targetRot = (Math.atan2(dx, -dy) * 180) / Math.PI
-        }
-        let diff = ((targetRot - rot + 540) % 360) - 180
+        if (dist > 1.5) targetRot = (Math.atan2(dx, -dy) * 180) / Math.PI
+        const diff = ((targetRot - rot + 540) % 360) - 180
         rot += diff * 0.18
-
         cur.style.left = px + 'px'
         cur.style.top = py + 'px'
         cur.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`
-
         if (dist > 4 && t - lastTrail > 28) {
           lastTrail = t
           const v = document.createElement('div')
@@ -127,25 +233,28 @@ export default function Home() {
           document.body.appendChild(v)
           setTimeout(() => v.remove(), 800)
         }
-
         lastX = mx
         lastY = my
         rafId = requestAnimationFrame(frame)
       }
       rafId = requestAnimationFrame(frame)
+      cleanups.push(() => {
+        window.removeEventListener('mousemove', onMove)
+        window.removeEventListener('mousedown', onDown)
+        clearInterval(hotTimer)
+        cancelAnimationFrame(rafId)
+      })
     }
 
     // ====== Scroll reveals
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const targets = document.querySelectorAll(
-      '.section-head, .telemetry .cell, .log-row, .edu-card, .cap-block, .contact, .caps-side, .work'
+    const revealTargets = document.querySelectorAll(
+      '.section-head, .telemetry .cell, .edu-card, .stack-block, .contact, .stack-side, .work'
     )
-    targets.forEach((el) => el.classList.add('reveal'))
-    let revealIo: IntersectionObserver | undefined
+    revealTargets.forEach((el) => el.classList.add('reveal'))
     if (prefersReduced) {
-      targets.forEach((el) => el.classList.add('in'))
+      revealTargets.forEach((el) => el.classList.add('in'))
     } else {
-      revealIo = new IntersectionObserver(
+      const io = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
@@ -156,25 +265,25 @@ export default function Home() {
               const idx = Math.max(0, sibs.indexOf(entry.target))
               const delay = Math.min(idx, 5) * 70
               setTimeout(() => entry.target.classList.add('in'), delay)
-              revealIo!.unobserve(entry.target)
+              io.unobserve(entry.target)
             }
           })
         },
         { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
       )
-      targets.forEach((el) => revealIo!.observe(el))
+      revealTargets.forEach((el) => io.observe(el))
+      cleanups.push(() => io.disconnect())
     }
 
     // ====== Count-up stats
-    let countIo: IntersectionObserver | undefined
     if (!prefersReduced) {
       const nodes = document.querySelectorAll<HTMLElement>('[data-count]')
-      countIo = new IntersectionObserver(
+      const io = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return
             const el = entry.target as HTMLElement
-            countIo!.unobserve(el)
+            io.unobserve(el)
             const target = parseFloat(el.getAttribute('data-count') || '')
             if (isNaN(target)) return
             const prefix = el.getAttribute('data-prefix') || ''
@@ -185,8 +294,7 @@ export default function Home() {
             const step = (now: number) => {
               const p = Math.min(1, (now - start) / duration)
               const eased = 1 - Math.pow(1 - p, 3)
-              const val = target * eased
-              el.textContent = prefix + val.toFixed(decimals) + suffix
+              el.textContent = prefix + (target * eased).toFixed(decimals) + suffix
               if (p < 1) requestAnimationFrame(step)
             }
             requestAnimationFrame(step)
@@ -194,83 +302,382 @@ export default function Home() {
         },
         { threshold: 0.4 }
       )
-      nodes.forEach((n) => countIo!.observe(n))
+      nodes.forEach((n) => io.observe(n))
+      cleanups.push(() => io.disconnect())
     }
 
-    // ====== Headline decode/scramble
-    const decodeTimeouts: ReturnType<typeof setTimeout>[] = []
-    const decodeIntervals: ReturnType<typeof setInterval>[] = []
-    if (!prefersReduced) {
-      const scrambleTargets = document.querySelectorAll<HTMLElement>('h1.hero-title .alt')
-      const chars = '!@#$%&*+-/=?ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'
-      scrambleTargets.forEach((el, idx) => {
-        const finalText = el.textContent || ''
-        const len = finalText.length
-        let progress = 0
-        let frame = 0
-        const startDelay = 700 + idx * 300
-        const t1 = setTimeout(() => {
-          const interval = setInterval(() => {
-            frame++
-            if (frame % 2 === 0) progress = Math.min(len, progress + 1)
-            let out = ''
-            for (let i = 0; i < len; i++) {
-              if (i < progress) out += finalText[i]
-              else if (finalText[i] === ' ') out += ' '
-              else out += chars[Math.floor(Math.random() * chars.length)]
+    // ====== Headline flap boards + role rotator
+    {
+      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-./ '
+      const flaps = document.querySelectorAll<HTMLElement>('.flap[data-flap]')
+
+      const animateFlap = (
+        chars: { span: HTMLSpanElement; final: string; settled: boolean }[]
+      ) => {
+        const startTime = performance.now()
+        const settleStep = 90
+        const flipInterval = 55
+        let lastFlip = 0
+        const tick = (now: number) => {
+          const elapsed = now - startTime
+          const settledCount = Math.min(chars.length, Math.floor(elapsed / settleStep))
+          for (let i = 0; i < chars.length; i++) {
+            const c = chars[i]
+            if (!c || !c.span) continue
+            if (i < settledCount && !c.settled) {
+              c.settled = true
+              c.span.textContent = c.final === ' ' ? ' ' : c.final
+              c.span.classList.remove('flip')
+              void c.span.offsetWidth
+              c.span.classList.add('flip')
             }
-            el.textContent = out
-            if (progress >= len) {
-              el.textContent = finalText
-              clearInterval(interval)
+          }
+          if (now - lastFlip > flipInterval) {
+            lastFlip = now
+            for (let i = settledCount; i < chars.length; i++) {
+              const c = chars[i]
+              if (!c || !c.span) continue
+              if (c.final === ' ') {
+                c.span.textContent = ' '
+                continue
+              }
+              c.span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)]
+              c.span.classList.remove('flip')
+              void c.span.offsetWidth
+              c.span.classList.add('flip')
             }
-          }, 40)
-          decodeIntervals.push(interval)
-        }, startDelay)
-        decodeTimeouts.push(t1)
+          }
+          if (settledCount < chars.length) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      }
+
+      flaps.forEach((el) => {
+        const target = el.getAttribute('data-flap') || ''
+        const delay = parseInt(el.getAttribute('data-flap-delay') || '0', 10)
+        el.textContent = ''
+        const chars: { span: HTMLSpanElement; final: string; settled: boolean }[] = []
+        for (let i = 0; i < target.length; i++) {
+          const span = document.createElement('span')
+          span.className = 'flap-char'
+          span.textContent = ' '
+          el.appendChild(span)
+          chars.push({ span, final: target[i], settled: false })
+        }
+        if (prefersReduced) {
+          chars.forEach((c) => (c.span.textContent = c.final === ' ' ? ' ' : c.final))
+          return
+        }
+        const t = setTimeout(() => animateFlap(chars), delay)
+        cleanups.push(() => clearTimeout(t))
+      })
+
+      const rotator = document.getElementById('roleRotator')
+      if (rotator) {
+        const roles = ['DEVELOPER', 'AI ENGINEER', 'FDE @ CHECKSUM', 'BUILDER', 'AVGEEK', 'SHIPS THINGS']
+        const padLen = roles.reduce((m, r) => Math.max(m, r.length), 0)
+        rotator.textContent = ''
+        const charSpans: HTMLSpanElement[] = []
+        for (let i = 0; i < padLen; i++) {
+          const s = document.createElement('span')
+          s.className = 'flap-char'
+          s.textContent = ' '
+          rotator.appendChild(s)
+          charSpans.push(s)
+        }
+        const showRole = (role: string) => {
+          const finals = role.padEnd(padLen, ' ').split('')
+          const startTime = performance.now()
+          const settleStep = 75
+          const flipInterval = 55
+          const settledFlags = finals.map(() => false)
+          let lastFlip = 0
+          const tick = (now: number) => {
+            const elapsed = now - startTime
+            const settledCount = Math.min(finals.length, Math.floor(elapsed / settleStep))
+            for (let i = 0; i < finals.length; i++) {
+              const span = charSpans[i]
+              if (!span) continue
+              if (i < settledCount && !settledFlags[i]) {
+                settledFlags[i] = true
+                span.textContent = finals[i] === ' ' ? ' ' : finals[i]
+                span.classList.remove('flip')
+                void span.offsetWidth
+                span.classList.add('flip')
+              }
+            }
+            if (now - lastFlip > flipInterval) {
+              lastFlip = now
+              for (let i = settledCount; i < finals.length; i++) {
+                const span = charSpans[i]
+                if (!span) continue
+                if (finals[i] === ' ') {
+                  span.textContent = ' '
+                  continue
+                }
+                span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)]
+                span.classList.remove('flip')
+                void span.offsetWidth
+                span.classList.add('flip')
+              }
+            }
+            if (settledCount < finals.length) requestAnimationFrame(tick)
+          }
+          requestAnimationFrame(tick)
+        }
+        showRole(roles[0])
+        if (!prefersReduced) {
+          let idx = 0
+          const t = setInterval(() => {
+            idx = (idx + 1) % roles.length
+            showRole(roles[idx])
+          }, 2800)
+          cleanups.push(() => clearInterval(t))
+        }
+      }
+    }
+
+    // ====== World journey (maplibre, scroll-driven)
+    let cancelled = false
+    const track = document.getElementById('worldTrack')
+    const mapContainer = document.getElementById('worldMap')
+    if (track && mapContainer) {
+      import('maplibre-gl').then((mod) => {
+        if (cancelled) return
+        const maplibregl = mod.default
+
+        const stops = [
+          { id: 'world', label: 'WORLD VIEW', center: [10, 25] as [number, number], zoom: 1.5 },
+          { id: 'chennai', label: 'CHENNAI', center: [80.27, 13.08] as [number, number], zoom: 9 },
+          { id: 'riverside', label: 'RIVERSIDE', center: [-117.39, 33.95] as [number, number], zoom: 9.5 },
+          { id: 'sfo', label: 'SAN FRANCISCO', center: [-122.42, 37.77] as [number, number], zoom: 10 },
+        ]
+        const markers = [
+          { id: 'mumbai', name: 'MUMBAI', coords: [72.88, 19.08] as [number, number], context: true },
+          { id: 'delhi', name: 'DELHI', coords: [77.21, 28.64] as [number, number], context: true },
+          { id: 'chennai', name: 'CHENNAI', coords: [80.27, 13.08] as [number, number], context: false },
+          { id: 'riverside', name: 'RIVERSIDE', coords: [-117.39, 33.95] as [number, number], context: false },
+          { id: 'sfo', name: 'SAN FRANCISCO', coords: [-122.42, 37.77] as [number, number], context: false },
+        ]
+        const stopContent = [
+          {
+            coord: 'WORLD VIEW &middot; SCROLL TO FLY THE PATH',
+            city: 'The route<em>.</em>',
+            role: 'From Mumbai to here. Three cities of work, one through-line.',
+            when: '<span class="lbl">SPAN</span> <span>2019 &rarr; now</span>',
+          },
+          {
+            coord: '01 / MAA &middot; 13.08&deg;N 80.27&deg;E',
+            city: 'Chennai<em>.</em>',
+            role: '<b>B.E. Computer Science</b> at VIT Chennai &mdash; where I learned to ship code.',
+            when: '<span class="lbl">YEARS</span> <span>2019 &mdash; 2023</span>',
+          },
+          {
+            coord: '02 / RIV &middot; 33.95&deg;N 117.39&deg;W',
+            city: 'Riverside<em>.</em>',
+            role: '<b>M.S. Computer Science</b> at UC Riverside. Researched LLM-driven drone control at CRIS.',
+            when: '<span class="lbl">YEARS</span> <span>2023 &mdash; 2025</span>',
+          },
+          {
+            coord: '03 / SFO &middot; 37.77&deg;N 122.42&deg;W &middot; <span style="color:var(--green);">CURRENT</span>',
+            city: 'San Francisco<em>.</em>',
+            role: '<b>Forward Deployed Engineer</b> at Checksum AI &mdash; LLM systems landed inside enterprise codebases.',
+            when: '<span class="lbl">SINCE</span> <span>Nov 2025</span>',
+          },
+        ]
+
+        const map = new maplibregl.Map({
+          container: mapContainer,
+          style: 'https://tiles.openfreemap.org/styles/dark',
+          center: stops[0].center,
+          zoom: stops[0].zoom,
+          interactive: false,
+          attributionControl: false,
+          pitch: 0,
+          fadeDuration: 100,
+          renderWorldCopies: true,
+        })
+        if (map.dragRotate) map.dragRotate.disable()
+        if (map.touchZoomRotate) map.touchZoomRotate.disableRotation()
+
+        const markerEls: Record<string, HTMLElement> = {}
+        let mapReady = false
+
+        const greatCircle = (a: number[], b: number[], segments: number) => {
+          const pts: [number, number][] = []
+          const lat1 = (a[1] * Math.PI) / 180
+          const lon1 = (a[0] * Math.PI) / 180
+          const lat2 = (b[1] * Math.PI) / 180
+          const lon2 = (b[0] * Math.PI) / 180
+          const d =
+            2 *
+            Math.asin(
+              Math.sqrt(
+                Math.pow(Math.sin((lat2 - lat1) / 2), 2) +
+                  Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)
+              )
+            )
+          for (let i = 0; i <= segments; i++) {
+            const f = i / segments
+            const A = Math.sin((1 - f) * d) / Math.sin(d)
+            const B = Math.sin(f * d) / Math.sin(d)
+            const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2)
+            const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2)
+            const z = A * Math.sin(lat1) + B * Math.sin(lat2)
+            const lat = Math.atan2(z, Math.sqrt(x * x + y * y))
+            const lon = Math.atan2(y, x)
+            pts.push([(lon * 180) / Math.PI, (lat * 180) / Math.PI])
+          }
+          return pts
+        }
+
+        map.on('load', () => {
+          mapReady = true
+          markers.forEach((m) => {
+            const el = document.createElement('div')
+            el.className = 'map-marker' + (m.context ? ' context' : '')
+            el.innerHTML = '<span class="dot"></span><span class="label">' + m.name + '</span>'
+            markerEls[m.id] = el
+            new maplibregl.Marker({ element: el, anchor: 'left' }).setLngLat(m.coords).addTo(map)
+          })
+
+          const careerPath = [
+            [80.27, 13.08],
+            [-117.39, 33.95],
+            [-122.42, 37.77],
+          ]
+          const segs: [number, number][][] = []
+          for (let i = 0; i < careerPath.length - 1; i++) {
+            segs.push(greatCircle(careerPath[i], careerPath[i + 1], 64))
+          }
+          map.addSource('career-path', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: segs.map((coords) => ({
+                type: 'Feature' as const,
+                geometry: { type: 'LineString' as const, coordinates: coords },
+                properties: {},
+              })),
+            },
+          })
+          map.addLayer({
+            id: 'career-path-line',
+            type: 'line',
+            source: 'career-path',
+            paint: {
+              'line-color': '#ffb020',
+              'line-width': 1.4,
+              'line-opacity': 0.7,
+              'line-dasharray': [2, 2.5],
+            },
+          })
+          update()
+        })
+        map.on('error', (e) => {
+          console.warn('[journey] map error', e && e.error ? e.error.message : e)
+        })
+
+        const stopLabelEl = document.getElementById('worldStopLabel')
+        const progressEl = document.getElementById('worldProgress')
+        const progressSpans = progressEl ? progressEl.querySelectorAll('span') : []
+        const infoEl = document.getElementById('worldInfo')
+        const coordEl = document.getElementById('worldCoord')
+        const cityEl = document.getElementById('worldCity')
+        const roleEl = document.getElementById('worldRole')
+        const whenEl = document.getElementById('worldWhen')
+        const hintEl = document.getElementById('worldHint')
+
+        const lerp = (a: number, b: number, t: number) => a + (b - a) * t
+        const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
+
+        const getInterpolatedStop = (progress: number) => {
+          const i = Math.floor(progress)
+          const t = progress - i
+          const a = stops[Math.min(stops.length - 1, i)]
+          const b = stops[Math.min(stops.length - 1, i + 1)]
+          if (!b) return { center: a.center, zoom: a.zoom }
+          const e = easeInOut(Math.max(0, Math.min(1, t)))
+          return {
+            center: [lerp(a.center[0], b.center[0], e), lerp(a.center[1], b.center[1], e)] as [
+              number,
+              number,
+            ],
+            zoom: lerp(a.zoom, b.zoom, e),
+          }
+        }
+
+        let currentStopIndex = -1
+        let swapTimer: ReturnType<typeof setTimeout> | null = null
+        const setActiveStop = (i: number) => {
+          if (i === currentStopIndex) return
+          const wasFirst = currentStopIndex === -1
+          currentStopIndex = i
+          progressSpans.forEach((s, idx) => s.classList.toggle('on', idx <= i))
+          const stop = stops[i] || stops[0]
+          if (stopLabelEl) stopLabelEl.textContent = stop.label
+          Object.keys(markerEls).forEach((id) => {
+            markerEls[id].classList.toggle('active', id === stop.id)
+          })
+          if (infoEl && coordEl && cityEl && roleEl && whenEl) {
+            const content = stopContent[i] || stopContent[0]
+            if (wasFirst) {
+              coordEl.innerHTML = content.coord
+              cityEl.innerHTML = content.city
+              roleEl.innerHTML = content.role
+              whenEl.innerHTML = content.when
+            } else {
+              if (swapTimer) clearTimeout(swapTimer)
+              infoEl.classList.add('fading')
+              swapTimer = setTimeout(() => {
+                coordEl.innerHTML = content.coord
+                cityEl.innerHTML = content.city
+                roleEl.innerHTML = content.role
+                whenEl.innerHTML = content.when
+                infoEl.classList.remove('fading')
+              }, 240)
+            }
+          }
+        }
+
+        let raf: number | null = null
+        const update = () => {
+          if (raf) cancelAnimationFrame(raf)
+          raf = requestAnimationFrame(() => {
+            const rect = track.getBoundingClientRect()
+            const trackTop = window.scrollY + rect.top
+            const trackHeight = track.offsetHeight - window.innerHeight
+            const rawProgress = (window.scrollY - trackTop) / trackHeight
+            const clamped = Math.max(0, Math.min(1, rawProgress))
+            const seg = clamped * (stops.length - 1)
+            const target = getInterpolatedStop(seg)
+            if (mapReady) map.jumpTo({ center: target.center, zoom: target.zoom })
+            setActiveStop(Math.round(seg))
+            if (hintEl) {
+              const inSection = rect.top < window.innerHeight && rect.bottom > 0
+              hintEl.classList.toggle('show', inSection && clamped < 0.95)
+            }
+          })
+        }
+
+        setActiveStop(0)
+        window.addEventListener('scroll', update, { passive: true })
+        window.addEventListener('resize', update)
+        update()
+
+        cleanups.push(() => {
+          window.removeEventListener('scroll', update)
+          window.removeEventListener('resize', update)
+          if (raf) cancelAnimationFrame(raf)
+          if (swapTimer) clearTimeout(swapTimer)
+          map.remove()
+        })
       })
     }
 
-    // ====== Radar dynamic blip
-    const radar = document.getElementById('radar')
-    let radarRaf = 0
-    if (radar) {
-      const target = document.createElement('div')
-      target.className = 'radar-blip'
-      target.style.width = '7px'
-      target.style.height = '7px'
-      target.style.left = '50%'
-      target.style.top = '50%'
-      target.style.background = 'var(--cyan)'
-      target.style.boxShadow = '0 0 10px var(--cyan)'
-      target.style.zIndex = '2'
-      radar.appendChild(target)
-      let t = 0
-      const step = () => {
-        t += 0.006
-        const r = 36 + 4 * Math.sin(t * 1.3)
-        const x = 50 + r * Math.cos(t)
-        const y = 50 + r * Math.sin(t * 0.78)
-        target.style.left = x + '%'
-        target.style.top = y + '%'
-        radarRaf = requestAnimationFrame(step)
-      }
-      radarRaf = requestAnimationFrame(step)
-    }
-
     return () => {
-      if (clockTimer) clearInterval(clockTimer)
-      window.removeEventListener('scroll', onScroll)
-      anchors.forEach((a) => a.removeEventListener('click', anchorClick))
-      if (onMove) window.removeEventListener('mousemove', onMove)
-      if (onDown) window.removeEventListener('mousedown', onDown)
-      if (hotTimer) clearInterval(hotTimer)
-      if (rafId) cancelAnimationFrame(rafId)
-      if (revealIo) revealIo.disconnect()
-      if (countIo) countIo.disconnect()
-      decodeTimeouts.forEach((t) => clearTimeout(t))
-      decodeIntervals.forEach((i) => clearInterval(i))
-      if (radarRaf) cancelAnimationFrame(radarRaf)
+      cancelled = true
+      cleanups.forEach((fn) => fn())
     }
   }, [])
 
@@ -295,22 +702,22 @@ export default function Home() {
         <div className="topbar-inner">
           <div className="brand">
             <div className="brand-mark mono">V</div>
-            <span className="brand-call">VIDIT.NAIK</span>
-            <span className="brand-dim">/ FDE</span>
+            <span className="brand-call">VIDIT&nbsp;NAIK</span>
+            <span className="brand-dim">/ Software Engineer</span>
           </div>
           <nav className="nav">
-            <a href="#about" className="active">01 / Brief</a>
-            <a href="#log">02 / Flight Log</a>
-            <a href="#work">03 / Work</a>
-            <a href="#stack">04 / Stack</a>
-            <a href="#contact">05 / Contact</a>
+            <a href="#about" className="active">hello</a>
+            <a href="#journey">journey</a>
+            <a href="#work">work</a>
+            <a href="#stack">stack</a>
+            <a href="#contact">say hi</a>
           </nav>
           <div className="status">
-            <span><span className="status-dot"></span>ON STATION</span>
+            <span><span className="status-dot"></span>Available</span>
             <span className="sep hide-sm">·</span>
-            <span className="hide-sm">KSFO 37.7749°N · 122.4194°W</span>
+            <span className="hide-sm">San Francisco</span>
             <span className="sep hide-sm">·</span>
-            <span id="utc-clock" className="hide-sm">— UTC</span>
+            <span id="utc-clock" className="hide-sm">—</span>
           </div>
         </div>
       </header>
@@ -322,28 +729,36 @@ export default function Home() {
             <div>
               <div className="hero-tag">
                 <span className="pip"></span>
-                <span>Currently flying with</span>
+                <span>Currently at</span>
                 <strong>Checksum AI</strong>
                 <span style={{ color: 'var(--ink-4)' }}>·</span>
                 <span>SFO</span>
               </div>
 
-              <h1 className="hero-title">
-                <span className="stack">Vidit Naik<span className="cursor" aria-hidden="true"></span></span>
-                <span className="stack"><span className="alt">building</span> AI that</span>
-                <span className="stack">actually <span className="alt">ships.</span></span>
+              <h1 className="hero-title" id="heroTitle">
+                <span className="flap-line">
+                  <span className="flap" data-flap="VIDIT NAIK" data-flap-delay="200"></span>
+                </span>
+                <span className="flap-line">
+                  <span className="alt" id="roleRotator" aria-live="polite">DEVELOPER</span>
+                </span>
+                <span className="flap-line">
+                  <span
+                    className="flap"
+                    data-flap="WHO BUILDS."
+                    data-flap-delay="900"
+                    data-flap-color="amber"
+                  ></span>
+                </span>
               </h1>
 
               <p className="hero-sub">
-                I&apos;m a software engineer who builds <b>AI things that actually ship</b>
-                {' '}— currently at Checksum AI, helping LLM systems graduate from prototype
-                {' '}into production code that real enterprise users touch every day.
+                Software engineer building AI that actually ships — currently at{' '}
+                <b>Checksum&nbsp;AI</b>, helping LLM systems graduate from prototype into
+                production code real enterprise users touch every day.
               </p>
               <p className="hero-sub" style={{ marginTop: '-22px', color: 'var(--ink-3)', fontSize: '16px' }}>
-                Off the clock I&apos;m an unrepentant{' '}
-                <b style={{ color: 'var(--amber-2)', fontWeight: 500 }}>aviation geek</b>
-                {' '}— deep in a FlightRadar24 tab, learning approach plates for airports I&apos;ll
-                {' '}never fly into, and ready to argue that the CRJ-900 is criminally underrated.
+                Also an avgeek.
               </p>
 
               <div className="cta-row">
@@ -374,39 +789,48 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Instrument panel */}
-            <div className="instrument" aria-hidden="true">
-              <div className="instr-head">
-                <span><span className="lbl">●</span> RADAR / TFC</span>
-                <div className="right">
-                  <span>RNG 80NM</span>
-                  <span>HDG 274°</span>
+            {/* Now panel */}
+            <aside className="now-panel" aria-label="What I'm currently up to">
+              <div className="now-head">
+                <div className="left">
+                  <span className="dot"></span>
+                  <span className="lbl">NOW</span>
+                  <span>· LIVE</span>
+                </div>
+                <div>UPDATED WEEKLY</div>
+              </div>
+
+              <div className="now-list">
+                <div className="now-row">
+                  <div className="k">Role</div>
+                  <div className="v"><b>Checksum AI</b><small>Forward Deployed Engineer · SF</small></div>
+                </div>
+                <div className="now-row">
+                  <div className="k">Focus</div>
+                  <div className="v">LLM systems in production<small>self-healing QA · knowledge graphs</small></div>
+                </div>
+                <div className="now-row">
+                  <div className="k">Based</div>
+                  <div className="v">San Francisco<small>previously Riverside · Chennai</small></div>
+                </div>
+                <div className="now-row">
+                  <div className="k">Open to</div>
+                  <div className="v">Smart conversations<small>not job-hunting — just curious</small></div>
                 </div>
               </div>
-              <div className="radar" id="radar">
-                <div className="radar-cross"></div>
-                <div className="radar-sweep"></div>
-                <div className="radar-center"></div>
-                <div className="radar-blip" style={{ left: '62%', top: '35%' }} title="Checksum AI"></div>
-                <div className="radar-blip dim" style={{ left: '30%', top: '28%' }} title="Shifa"></div>
-                <div className="radar-blip dim small" style={{ left: '38%', top: '70%' }}></div>
-                <div className="radar-blip dim small" style={{ left: '72%', top: '64%' }}></div>
-                <div className="radar-blip small" style={{ left: '20%', top: '55%' }}></div>
+
+              <div className="now-foot">
+                <span>VN · <span id="now-local-clock">——:——</span> PT</span>
+                <span className="scroll-cue"><span>scroll for the route</span> <span className="arr">↓</span></span>
               </div>
-              <div className="portrait-frame">
-                <div className="corners"><span></span><span></span><span></span><span></span></div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/vidit.jpeg" alt="Vidit Naik" />
-                <div className="tag">VN-001 / OPERATOR</div>
-              </div>
-            </div>
+            </aside>
           </div>
 
           {/* Telemetry strip */}
           <div className="telemetry">
             <div className="cell">
-              <div className="k">Position</div>
-              <div className="v">San Francisco<small>KSFO · UTC−08</small></div>
+              <div className="k">Based</div>
+              <div className="v">San Francisco<small>previously Riverside · Chennai</small></div>
             </div>
             <div className="cell">
               <div className="k">Role</div>
@@ -418,155 +842,75 @@ export default function Home() {
             </div>
             <div className="cell">
               <div className="k">Off duty</div>
-              <div className="v">Flight tracking<small>Approach plates · airline livery</small></div>
+              <div className="v">Avgeek<small>aviation is the through-line</small></div>
             </div>
           </div>
         </section>
 
-        {/* FLIGHT LOG */}
-        <section className="section wrap" id="log">
-          <div className="section-head">
-            <div>
-              <div className="section-eyebrow">02 / Flight Log</div>
-              <h2 className="section-title">Where I&apos;ve <em>logged hours.</em></h2>
-            </div>
-            <div className="section-meta">
-              5 ENTRIES · 5+ YRS<br />
-              MOST RECENT FIRST
+        {/* MARQUEE */}
+        <section aria-hidden="true">
+          <div className="marquee">
+            <div className="marquee-track" id="marqueeTrack">
+              <MarqueeSet label="( disciplines )" />
+              <MarqueeSet label="——  ( disciplines )" />
             </div>
           </div>
+        </section>
 
-          <div className="log">
-            <article className="log-row">
-              <div className="log-id mono">LOG_05</div>
-              <div className="log-when">
-                <span>NOV &apos;25</span><span className="arrow">→</span><span>NOW</span>
-                <span className="dur">on station</span>
-              </div>
-              <div className="log-body">
-                <a href="https://www.linkedin.com/company/checksum-ai" target="_blank" rel="noopener noreferrer" className="log-logo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/companies/checksum-ai.svg" alt="Checksum AI" />
-                </a>
-                <div className="log-content">
-                  <h3>Forward Deployed Engineer</h3>
-                  <div className="co">CHECKSUM AI · SAN FRANCISCO</div>
-                  <ul>
-                    <li><span className="log-bullet">▸</span>Land AI products inside enterprise codebases — design through enablement.</li>
-                    <li><span className="log-bullet">▸</span>Architecting self-healing QA pipelines: Claude analyzes DOM changes and patches broken selectors.</li>
-                    <li><span className="log-bullet">▸</span>Building internal LLM agents that enforce uniform code quality across client repos.</li>
-                    <li><span className="log-bullet">▸</span>Primary technical liaison — design sessions, demos, workshops, deployment.</li>
-                  </ul>
+        {/* WORLD JOURNEY */}
+        <section className="world-journey" id="journey">
+          <div className="world-journey-track" id="worldTrack">
+            <div className="world-stage">
+              <div className="world-frame">
+                <div className="world-map" id="worldMap"></div>
+                <div className="world-vignette" aria-hidden="true"></div>
+                <div className="map-attrib">
+                  ©{' '}
+                  <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>
+                  {' '}·{' '}
+                  <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>
                 </div>
               </div>
-              <div className="log-tags">
-                <span className="tag hot">CLAUDE</span><span className="tag">PLAYWRIGHT</span><span className="tag">LLM AGENTS</span><span className="tag">FDE</span>
-              </div>
-            </article>
 
-            <article className="log-row">
-              <div className="log-id mono">LOG_04</div>
-              <div className="log-when">
-                <span>JUL &apos;25</span><span className="arrow">→</span><span>OCT &apos;25</span>
-                <span className="dur">4 mo · BOS</span>
-              </div>
-              <div className="log-body">
-                <a href="https://www.linkedin.com/company/shifa-precision" target="_blank" rel="noopener noreferrer" className="log-logo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/companies/shifa-precision.png" alt="Shifa Precision" />
-                </a>
-                <div className="log-content">
-                  <h3>Software Engineer · AI/ML</h3>
-                  <div className="co">SHIFA PRECISION · BOSTON</div>
-                  <ul>
-                    <li><span className="log-bullet">▸</span>Led backend for Project Oasis — real-time patient &ldquo;digital twins&rdquo; on GCP + Neo4j.</li>
-                    <li><span className="log-bullet">▸</span>Architected API-first pipeline unifying biomedical data into a knowledge graph with 10M+ relationships.</li>
-                    <li><span className="log-bullet">▸</span>LLM-based entity extraction over unstructured biomedical text at 95% accuracy.</li>
-                  </ul>
+              <div className="world-overlay">
+                <div className="left">
+                  <div>
+                    <div className="world-meta">
+                      <span className="dot"></span>
+                      <span>02 / THE ROUTE</span>
+                    </div>
+                    <h3 className="world-title-h3">
+                      Chennai to <em>here.</em>
+                    </h3>
+                  </div>
+                  <div>
+                    <div className="world-meta" style={{ marginBottom: '8px' }}>
+                      <span style={{ color: 'var(--ink-3)' }}>CURRENT</span>
+                      <span style={{ color: 'var(--amber)' }} id="worldStopLabel">WORLD VIEW</span>
+                    </div>
+                    <div className="world-progress" id="worldProgress">
+                      <span className="on"></span><span></span><span></span><span></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="right">
+                  <div className="world-info" id="worldInfo">
+                    <div className="coord">
+                      <span className="pip"></span>
+                      <span id="worldCoord">WORLD VIEW · SCROLL TO FLY THE PATH</span>
+                    </div>
+                    <h4 id="worldCity">The route<em>.</em></h4>
+                    <div className="role" id="worldRole">Three cities, one through-line.</div>
+                    <div className="when" id="worldWhen">2019 → now</div>
+                  </div>
                 </div>
               </div>
-              <div className="log-tags">
-                <span className="tag">NEO4J</span><span className="tag">GCP</span><span className="tag hot">KG · 10M+</span><span className="tag">LLMS</span>
-              </div>
-            </article>
 
-            <article className="log-row">
-              <div className="log-id mono">LOG_03</div>
-              <div className="log-when">
-                <span>OCT &apos;24</span><span className="arrow">→</span><span>MAR &apos;25</span>
-                <span className="dur">6 mo · UCR</span>
+              <div className="world-hint" id="worldHint">
+                <span>keep scrolling</span> <span className="arr">↓</span>
               </div>
-              <div className="log-body">
-                <a href="https://cris.ucr.edu" target="_blank" rel="noopener noreferrer" className="log-logo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/companies/ucr-cris.png" alt="UCR CRIS" />
-                </a>
-                <div className="log-content">
-                  <h3>Student Researcher</h3>
-                  <div className="co">CENTER FOR ROBOTICS &amp; INTELLIGENT SYSTEMS · UCR</div>
-                  <ul>
-                    <li><span className="log-bullet">▸</span>Drones you can talk to: LLM-driven control via natural language.</li>
-                    <li><span className="log-bullet">▸</span>RAG pipeline (LangChain + vector embeddings) over manuals — 68% lift in command execution accuracy.</li>
-                    <li><span className="log-bullet">▸</span>Scrum-based delivery with research-engineering rigor.</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="log-tags">
-                <span className="tag">RAG</span><span className="tag">LANGCHAIN</span><span className="tag hot">+68% ACC</span><span className="tag">DRONES</span>
-              </div>
-            </article>
-
-            <article className="log-row">
-              <div className="log-id mono">LOG_02</div>
-              <div className="log-when">
-                <span>MAY &apos;22</span><span className="arrow">→</span><span>JUN &apos;22</span>
-                <span className="dur">internship</span>
-              </div>
-              <div className="log-body">
-                <a href="https://www.linkedin.com/company/view-kent-cam" target="_blank" rel="noopener noreferrer" className="log-logo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/companies/kent-cam.png" alt="Kent Cam" />
-                </a>
-                <div className="log-content">
-                  <h3>Machine Learning Engineer</h3>
-                  <div className="co">KENT CAM</div>
-                  <ul>
-                    <li><span className="log-bullet">▸</span>Used analytics to inform camera feature integration decisions.</li>
-                    <li><span className="log-bullet">▸</span>Automated cross-region pipelines, cutting validation errors by 35%.</li>
-                    <li><span className="log-bullet">▸</span>Held 99.9% data integrity across streaming inputs.</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="log-tags">
-                <span className="tag">ML</span><span className="tag">PIPELINES</span><span className="tag">−35% ERR</span>
-              </div>
-            </article>
-
-            <article className="log-row">
-              <div className="log-id mono">LOG_01</div>
-              <div className="log-when">
-                <span>JUL &apos;20</span><span className="arrow">→</span><span>FEB &apos;21</span>
-                <span className="dur">8 mo · NOIDA</span>
-              </div>
-              <div className="log-body">
-                <a href="https://www.linkedin.com/in/viditnaik/" target="_blank" rel="noopener noreferrer" className="log-logo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/companies/studetails.png" alt="StuDetails" />
-                </a>
-                <div className="log-content">
-                  <h3>Software Engineer</h3>
-                  <div className="co">STUDETAILS · NOIDA, IN</div>
-                  <ul>
-                    <li><span className="log-bullet">▸</span>Shipped a React + Flask app to 5,000+ monthly users across 50+ locations.</li>
-                    <li><span className="log-bullet">▸</span>Optimized AWS S3 / Glue workflows — +25% data accuracy.</li>
-                    <li><span className="log-bullet">▸</span>Stood up CI/CD; cut deployment failures by 30%.</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="log-tags">
-                <span className="tag">REACT</span><span className="tag">FLASK</span><span className="tag">AWS</span><span className="tag">CI/CD</span>
-              </div>
-            </article>
+            </div>
           </div>
         </section>
 
@@ -728,63 +1072,51 @@ export default function Home() {
           </div>
         </section>
 
-        {/* STACK / CAPABILITIES */}
+        {/* STACK */}
         <section className="section wrap" id="stack">
           <div className="section-head">
             <div>
               <div className="section-eyebrow">04 / Stack</div>
-              <h2 className="section-title">Tools on the <em>flight deck.</em></h2>
+              <h2 className="section-title">What I actually <em>reach for.</em></h2>
             </div>
-            <div className="section-meta">LAST UPDATED · 2026</div>
+            <div className="section-meta">DAILY DRIVERS · 2026</div>
           </div>
 
-          <div className="caps">
-            <div className="caps-side">
-              <p className="lead">I&apos;m a software engineer first — AI just happens to be the most interesting frontier to ship into right now.</p>
-              <p>I&apos;m equally comfortable in a Jupyter notebook arguing about embeddings and in a client&apos;s Terraform repo arguing about IAM. The kit on the right is what I actually reach for day to day. Aviation enthusiasm not pictured.</p>
+          <div className="stack-grid">
+            <div className="stack-side">
+              <p className="lead">The stack I actually use, day in, day out.</p>
+              <p>Equally at home in a Jupyter notebook arguing about embeddings and a client&apos;s Terraform repo arguing about IAM. Nothing below is here just to fill space.</p>
+              <p style={{ color: 'var(--ink-3)', fontSize: '13.5px' }}>
+                Curious about something specific?{' '}
+                <a href="#contact" style={{ color: 'var(--amber)', borderBottom: '1px solid var(--amber)' }}>Ask me</a>.
+              </p>
             </div>
 
-            <div className="caps-grid">
-              <div className="cap-block">
-                <h4><span className="num">01</span> · AI / ML</h4>
-                <ul>
-                  <li>Large Language Models <span className="level">Claude · Gemini · Qwen</span></li>
-                  <li>Retrieval Augmented Generation <span className="level">LangChain · Vectors</span></li>
-                  <li>Fine-tuning (LoRA, quant) <span className="level">PyTorch · Ollama</span></li>
-                  <li>Agents &amp; multi-agent <span className="level">LangGraph</span></li>
-                  <li>Knowledge graphs <span className="level">Neo4j</span></li>
-                </ul>
-              </div>
-              <div className="cap-block">
-                <h4><span className="num">02</span> · Backend</h4>
-                <ul>
-                  <li>Python <span className="level">Flask · Django · FastAPI</span></li>
-                  <li>Node.js <span className="level">Express</span></li>
-                  <li>Java <span className="level">SpringBoot</span></li>
-                  <li>SQL · NoSQL <span className="level">MySQL · MongoDB</span></li>
-                  <li>RESTful microservices <span className="level">API-first</span></li>
-                </ul>
-              </div>
-              <div className="cap-block">
-                <h4><span className="num">03</span> · Cloud / DevOps</h4>
-                <ul>
-                  <li>AWS <span className="level">S3 · Glue · Lambda · EC2</span></li>
-                  <li>GCP <span className="level">Compute · Storage</span></li>
-                  <li>Containers <span className="level">Docker · Kubernetes</span></li>
-                  <li>CI/CD <span className="level">Jenkins · GH Actions</span></li>
-                  <li>Observability <span className="level">Logging · Metrics</span></li>
-                </ul>
-              </div>
-              <div className="cap-block">
-                <h4><span className="num">04</span> · QA / Frontend</h4>
-                <ul>
-                  <li>Playwright <span className="level">self-healing</span></li>
-                  <li>PyTest · JUnit · Selenium <span className="level">full-stack QA</span></li>
-                  <li>React <span className="level">prototyping</span></li>
-                  <li>Git / GitHub <span className="level">daily driver</span></li>
-                  <li>Jira / Agile <span className="level">Scrum delivery</span></li>
-                </ul>
-              </div>
+            <div className="stack-blocks">
+              {stackBlocks.map((block) => (
+                <div className="stack-block" key={block.num}>
+                  <h4><span className="num">{block.num}</span> · {block.title}</h4>
+                  {block.skills.map((s) => (
+                    <div className="skill-row" key={s.name}>
+                      {s.noLogo ? (
+                        <span className="logo no-logo">{s.noLogo}</span>
+                      ) : (
+                        <span className="logo">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`https://cdn.simpleicons.org/${s.logo}/aab2c2`}
+                            alt=""
+                            onError={(e) => e.currentTarget.classList.add('broken')}
+                          />
+                          {s.fb && <span className="fb">{s.fb}</span>}
+                        </span>
+                      )}
+                      <span className="name">{s.name}</span>
+                      <span className="level">{s.level}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -793,8 +1125,8 @@ export default function Home() {
         <section className="section wrap" id="education">
           <div className="section-head">
             <div>
-              <div className="section-eyebrow">05 / Training</div>
-              <h2 className="section-title">Where I got <em>type-rated.</em></h2>
+              <div className="section-eyebrow">06 / School</div>
+              <h2 className="section-title">Where I went to <em>school.</em></h2>
             </div>
             <div className="section-meta">2 INSTITUTIONS · BS + MS</div>
           </div>
@@ -829,9 +1161,9 @@ export default function Home() {
         {/* CONTACT */}
         <section className="section wrap" id="contact">
           <div className="contact">
-            <div className="contact-eyebrow">06 / Final Approach</div>
-            <h2>Got something <em>interesting</em><br />in your hangar?</h2>
-            <p className="lede">I&apos;m currently at Checksum AI and happy there — but I always make time for a good conversation about LLM systems in production, weird research ideas, or anything aviation-adjacent.</p>
+            <div className="contact-eyebrow">07 / Say hi</div>
+            <h2>Got something <em>interesting</em><br />to talk about?</h2>
+            <p className="lede">I&apos;m at Checksum AI and happy there — but always down for a good conversation about LLM systems in production, weird research ideas, or anything you&apos;re building.</p>
 
             <div className="contact-actions">
               <a href="mailto:viditnaik@gmail.com" className="btn primary">
@@ -845,9 +1177,9 @@ export default function Home() {
 
             <div className="contact-meta">
               <div>
-                BASE
+                BASED
                 <strong>San Francisco, CA</strong>
-                1628 Alemany Blvd · KSFO
+                Mission District
               </div>
               <div>
                 CALL
@@ -855,7 +1187,7 @@ export default function Home() {
                 Voice / SMS · PT
               </div>
               <div>
-                FLIGHT PLAN
+                STATUS
                 <strong>Open to interesting work</strong>
                 Currently at Checksum AI
               </div>
@@ -873,7 +1205,7 @@ export default function Home() {
             <span style={{ color: 'var(--line-2)' }}>·</span>
             <span>NO TRACKING</span>
             <span style={{ color: 'var(--line-2)' }}>·</span>
-            <span>VFR CONDITIONS</span>
+            <span>HANDCRAFTED IN SF</span>
           </div>
           <div className="right">
             ↑ <a href="#about" style={{ borderBottom: '1px solid var(--line-2)', paddingBottom: '1px' }}>RETURN TO TOP</a>
